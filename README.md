@@ -1,4 +1,5 @@
 # \<color-picker>
+<img src="./demo/screenshot.png" width='600'>
 
 A weekend ramp up project to learn LIT basics. Maybe I can turn this into a shared npm if I can finish/polish (WCAG, best practices, etc.)
 
