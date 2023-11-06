@@ -6,7 +6,8 @@ export const transparentChex = css`height: 100%;
       background: linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), #fff;
       background-repeat: repeat, repeat;
       background-position: 0 0, 6px 6px;
-      background-size: 12px 12px, 12px 12px;`
+      background-size: 12px 12px, 12px 12px;
+`;
 
 export const formControl = css`display: inline-block;
       width: 69px;
@@ -20,9 +21,11 @@ export const formControl = css`display: inline-block;
       background-clip: padding-box;
       border: 1px solid #495057;
       border-radius: 3px;
-      transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;`
+      transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+`;
 export const focusedFormControl = css`color: #333;
       background-color: rgb(148 163 184);
       border-color: #86b7fe;
       outline: 0;
-      box-shadow: 0 2px 5px #ccc;`
+      box-shadow: 0 2px 5px #ccc;
+`;

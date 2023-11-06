@@ -31,39 +31,31 @@ export class ColorPicker extends LitElement {
       margin: 10px;
       box-shadow: 0 4px 12px #111;
     }
-
     .d-flex {
       display: flex;
       width: 100%;
       margin-top: 15px;
     }
-
     .w-30 {
       width: 30%;
     }
-
     .w-40 {
       width: 40%;
       position: relative;
       height:210px;
-
     }
-
     :host .form-control {
       ${formControl}
     }
-
     :host .form-control:focus {
       ${focusedFormControl}
     }
-
     :host label {
       width: 12px;
       display: inline-block;
       color: #ccc;
       font-family: var(--font-fam);
     }
-
     :host .hsl-mode{
       padding-left:16px;
       margin-top:18px;
@@ -132,7 +124,6 @@ export class ColorPicker extends LitElement {
       left:0;
       height:100%;
       width:100%;
-
     }
     :host .swatch span.checky{
       ${transparentChex}
@@ -162,14 +153,12 @@ export class ColorPicker extends LitElement {
     c = Color.parse(c);
     if (c) {
       this._color = c;
-
       const target = this.renderRoot.querySelector('div');
       const event = new CustomEvent('color-picked', {
         bubbles: true,
         composed: true,
         detail: { color: c }
       });
-
       target.dispatchEvent(event);
     }
   }
@@ -180,7 +169,7 @@ export class ColorPicker extends LitElement {
 
   setColor(c) {
     const cs = this.renderRoot.querySelector('input').value;
-    this.color = cs;
+    this.color = Color.parse(cs);
   }
 
   setHue({ detail: { h } }) {
@@ -210,8 +199,8 @@ export class ColorPicker extends LitElement {
             `)}<div class='hex'>
             <label>#</label>
             <input @input='${(e) => this.setColor(e)}' class='form-control' placeholder='Set color'
-                   .value='${this.color.hex}' /><a class="button copy" title='Copy+formats TBA'><!-- TODO: wire -->
-              <svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24"><path d="M13 7H7V5H13V7Z" fill="currentColor"></path><path d="M13 11H7V9H13V11Z" fill="currentColor"></path><path d="M7 15H13V13H7V15Z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M3 19V1H17V5H21V23H7V19H3ZM15 17V3H5V17H15ZM17 7V19H9V21H19V7H17Z" fill="currentColor"></path></svg></a>
+                   .value='${this.color.hex}' /><a class='button copy' title='Copy+formats TBA'><!-- TODO: wire -->
+              <svg stroke='currentColor' fill='none' stroke-width='0' viewBox='0 0 24 24'><path d='M13 7H7V5H13V7Z' fill='currentColor'></path><path d='M13 11H7V9H13V11Z' fill='currentColor'></path><path d='M7 15H13V13H7V15Z' fill='currentColor'></path><path fill-rule='evenodd' clip-rule='evenodd' d='M3 19V1H17V5H21V23H7V19H3ZM15 17V3H5V17H15ZM17 7V19H9V21H19V7H17Z' fill='currentColor'></path></svg></a>
             </div>
           </div>
           <div class='col w-30'>
@@ -230,7 +219,6 @@ export class ColorPicker extends LitElement {
               .color='${this.color}' @color-update='${this.updateColor}' ></hsl-canvas>
             <div class='ok'>
               <a class='button'>OK
-
                 <span class='swatch'>
                   <span style="${styleMap(swatchBg)}"></span>
                   <span class='checky'></span>

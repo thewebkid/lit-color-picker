@@ -17,12 +17,10 @@ export class HSLCanvas extends LitElement {
       top: 0;
       right: 0;
     }
-
     :host .outer canvas {
       height: inherit;
       width: inherit;
     }
-
     :host .circle {
       height: 12px;
       width: 12px;
@@ -83,6 +81,7 @@ export class HSLCanvas extends LitElement {
     if (!ctx) {
       return;
     }
+    //console.time('paint')
 
     let clr = color;
     let hsx = isHsl ? clr.hsl : clr.hsv; // hue-sat-whatever
@@ -104,6 +103,7 @@ export class HSLCanvas extends LitElement {
     let left = `${hsw.s * scale}px`;
     let top = `${size - (hsx.w * scale)}px`;
     this.circlePos = { top, left };
+    //console.timeEnd('paint')
   }
 
   willUpdate(props) {

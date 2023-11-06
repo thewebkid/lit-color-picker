@@ -17,6 +17,7 @@ export class ColorInputChannel extends LitElement {
     max: { type: Number },
     isHsl: { type: Boolean }
   };
+
   static styles = css`
     :host > div {
       margin-bottom: 8px;
@@ -67,6 +68,7 @@ export class ColorInputChannel extends LitElement {
       box-shadow: 0 2px 5px #ccc;
       pointer-events: all;
       z-index: 2;
+      cursor: pointer;
     }
 
     :host .preview-bar .pct {
@@ -79,6 +81,7 @@ export class ColorInputChannel extends LitElement {
       left: var(--pct);
       display: inline-block;
       z-index: 3;
+      pointer-events: none;
     }
 
     :host .preview-bar .pct:before {
@@ -98,8 +101,9 @@ export class ColorInputChannel extends LitElement {
   `;
 
   clickPreview(e) {
-    const x = e.offsetX;
-    let v = Math.round((x / 127) * this.max);
+    const w = 128;
+    const x = Math.max(0, Math.min(e.offsetX, w));
+    let v = Math.round((x / 128) * this.max);
     if (this.channel === 'a') {
       v = Number((x / 127).toFixed(2));
     }
@@ -187,8 +191,11 @@ export class ColorInputChannel extends LitElement {
       <div class='${classMap({ active: this.active })}'>
         <label>${this.channel.toUpperCase()}</label>
         <input
-          class='form-control' .value='${this.v}' type='number' @input='${this.valueChange}'
-          @focus='${() => this.setActive(true)}' @blur='${() => this.setActive(false)}'
+          class='form-control' .value='${this.v}'
+          type='number' min='0' max='${this.max}'
+          @input='${this.valueChange}'
+          @focus='${() => this.setActive(true)}'
+          @blur='${() => this.setActive(false)}'
         />
         <div class='preview-bar' style='${styleMap(this.previewGradient)}' @mousedown='${this.clickPreview}'>
           <div class='pct'></div>
