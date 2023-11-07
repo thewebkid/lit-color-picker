@@ -15,6 +15,7 @@ import { focusedFormControl, formControl, transparentChex } from './css.js';
 export class ColorPicker extends LitElement {
   static properties = {
     color: { type: Object },
+    hex: {type: String},
     value:{type:String, attribute:true},
     isHsl: { type: Boolean }
   };
@@ -152,14 +153,14 @@ export class ColorPicker extends LitElement {
   set color(c) {
     c = Color.parse(c);
     if (c) {
+      this.hex = c.hex;
       this._color = c;
-      const target = this.renderRoot.querySelector('div');
-      const event = new CustomEvent('color-picked', {
+      const event = new CustomEvent('preview', {
         bubbles: true,
         composed: true,
         detail: { color: c }
       });
-      target.dispatchEvent(event);
+      this.renderRoot.dispatchEvent(event);
     }
   }
 
@@ -182,6 +183,14 @@ export class ColorPicker extends LitElement {
     this.isHsl = hsl;
   }
 
+  okColor(){
+    const event = new CustomEvent('picked', {
+      bubbles: true,
+      composed: true,
+      detail: { color: this.color }
+    });
+    this.renderRoot.dispatchEvent(event);
+  }
   render() {
     const hslChannels = this.isHsl ? ['h', 's', 'l'] : ['h', 's', 'v'];
     const hsvClass = { button: true, active: !this.isHsl, l:true };
@@ -218,7 +227,7 @@ export class ColorPicker extends LitElement {
               size='${160}' .isHsl='${this.isHsl}'
               .color='${this.color}' @color-update='${this.updateColor}' ></hsl-canvas>
             <div class='ok'>
-              <a class='button'>OK
+              <a class='button' @click=${this.okColor}>OK
                 <span class='swatch'>
                   <span style="${styleMap(swatchBg)}"></span>
                   <span class='checky'></span>

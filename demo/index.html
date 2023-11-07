@@ -6,11 +6,44 @@
     body {
       background: #212529;
     }
+    body * {
+      color:white;
+      font-family: system-ui, -apple-system, "Segoe UI";
+    }
+    input[type=color]{
+      width:25px;
+    }
   </style>
   <script type="module" src="../color-picker.js"></script>
 
 </head>
 <body>
+  <label>
+    Pick a color
+    <input type='color' value='#000000'/>
+  </label>
   <color-picker value="steelblue"></color-picker>
+  <script>
+    window.addEventListener('load', ()=>{
+      const button = document.querySelector('input');
+      const cp = document.querySelector('color-picker');
+      cp.style.display = 'none';
+      button.value = cp.color.hex;
+      console.log({ cp })
+      cp.addEventListener('preview', ({detail:{color}}) => {
+        console.log({ picked: color, hex: color.hex, rgb: color.css });
+        button.value = color.hex;
+      });
+      cp.addEventListener('picked', ({detail:{color}}) => {
+        button.value = color.hex;
+        cp.style.display = 'none';
+      });
+      button.addEventListener('click', (e)=>{
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        cp.style.display = 'block';
+      })
+    });
+  </script>
 </body>
 </html>

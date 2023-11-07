@@ -17,10 +17,12 @@ export class HSLCanvas extends LitElement {
       top: 0;
       right: 0;
     }
+
     :host .outer canvas {
       height: inherit;
       width: inherit;
     }
+
     :host .circle {
       height: 12px;
       width: 12px;
@@ -107,7 +109,7 @@ export class HSLCanvas extends LitElement {
   }
 
   willUpdate(props) {
-    if (props.has('color')||props.has('isHsl')) {
+    if (props.has('color') || props.has('isHsl')) {
       this.paintHSL();
     }
   }
