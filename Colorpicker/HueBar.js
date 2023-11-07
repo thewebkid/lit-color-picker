@@ -15,7 +15,7 @@ export class HueBar extends LitElement{
       display: block;
       width:${unsafeCSS(this.width)}px;
       height:15px;
-
+      cursor: pointer;
       position: relative;
     }
     :host .slider {

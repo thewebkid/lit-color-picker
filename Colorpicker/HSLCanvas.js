@@ -16,11 +16,13 @@ export class HSLCanvas extends LitElement {
       position: absolute;
       top: 0;
       right: 0;
+
     }
 
     :host .outer canvas {
       height: inherit;
       width: inherit;
+      cursor: pointer;
     }
 
     :host .circle {

@@ -14,14 +14,6 @@ npm i color-picker
 ```html
 <script type="module">
   import 'color-picker/color-picker.js';
-</script>
-
-<label>
-  Pick a color
-  <input type='color' value='#000000'/>
-</label>
-<color-picker value="steelblue"></color-picker>
-<script>
   window.addEventListener('load', ()=>{
     const button = document.querySelector('input');
     const cp = document.querySelector('color-picker');
@@ -43,6 +35,13 @@ npm i color-picker
     })
   });
 </script>
+
+<label>
+  Pick a color
+  <input type='color' value='#000000'/>
+</label>
+<color-picker value="steelblue"></color-picker>
+
 ```
 
 ## Events

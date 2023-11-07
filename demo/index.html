@@ -11,19 +11,12 @@
       font-family: system-ui, -apple-system, "Segoe UI";
     }
     input[type=color]{
-      width:25px;
+      width:27px;
     }
   </style>
-  <script type="module" src="../color-picker.js"></script>
+  <script type="module">
+    import '../color-picker.js';
 
-</head>
-<body>
-  <label>
-    Pick a color
-    <input type='color' value='#000000'/>
-  </label>
-  <color-picker value="steelblue"></color-picker>
-  <script>
     window.addEventListener('load', ()=>{
       const button = document.querySelector('input');
       const cp = document.querySelector('color-picker');
@@ -45,5 +38,14 @@
       })
     });
   </script>
+
+</head>
+<body>
+  <label>
+    Pick a color
+    <input type='color' value='#000000'/>
+  </label>
+  <color-picker value="steelblue"></color-picker>
+
 </body>
 </html>
