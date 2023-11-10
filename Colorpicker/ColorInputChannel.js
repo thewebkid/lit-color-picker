@@ -1,104 +1,26 @@
-import { css, html, LitElement } from 'lit';
-import { Color, hueGradient } from './Color';
+import { html, LitElement } from 'lit';
+import { Color } from './Color';
+import { hueGradient } from './lib.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { focusedFormControl, formControl, transparentChex } from './css.js';
+import { inputChannelRules } from './css.js';
+import { colorEvent } from './lib.js';
 
 export class ColorInputChannel extends LitElement {
   static properties = {
-    group: { type: String, attribute: true },
-    channel: { type: String, attribute: true },
+    group: { type: String },
+    channel: { type: String },
     color: { type: Object },
-    c: { type: Object },
-    v: { type: Number },
-    groupColor: { type: Object },
-    previewGradient: { type: Object },
-    active: { type: Boolean },
-    max: { type: Number },
-    isHsl: { type: Boolean }
+    isHsl: { type: Boolean },
+    c: { type: Object, state: true, attribute: false },
+    previewGradient: { type: Object, state: true, attribute: false },
+    active: { type: Boolean, state: true, attribute: false },
+    max: { type: Number, state: true, attribute: false },
+    v: { type: Number, state: true, attribute: false }
   };
 
-  static styles = css`
-    :host > div {
-      margin-bottom: 8px;
-      display: block;
-      position: relative;
-    }
 
-    :host label {
-      width: 12px;
-      display: inline-block;
-      color: #ccc;
-      font-family: var(--font-fam);
-    }
-
-    :host .form-control {
-      ${formControl}
-    }
-
-    :host .form-control:focus {
-      ${focusedFormControl}
-    }
-
-    :host .preview-bar {
-      height: 4px;
-      width: 85px;
-      position: absolute;
-      bottom: 0px;
-      right: 18px;
-      --pct: 0;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    :host .preview-bar:after {
-      position: absolute;
-      content: '';
-      background-image: var(--preview);
-      height: 100%;
-      width: 100%;
-    }
-
-    :host > div.active .preview-bar {
-      width: 128px;
-      bottom: -23px;
-      right: -9px;
-      height: 10px;
-      border: 8px solid #020617;
-      box-shadow: 0 2px 5px #ccc;
-      pointer-events: all;
-      z-index: 2;
-      cursor: pointer;
-    }
-
-    :host .preview-bar .pct {
-      bottom: -3px;
-      margin-top: -.75px;
-      position: absolute;
-      width: 3px;
-      height: 11px;
-      background: 0 0;
-      left: var(--pct);
-      display: inline-block;
-      z-index: 3;
-      pointer-events: none;
-    }
-
-    :host .preview-bar .pct:before {
-      content: "";
-      height: 7px;
-      width: 5px;
-      position: absolute;
-      left: -2.5px;
-      top: 2.5px;
-      background-color: #fff;
-      clip-path: polygon(50% 0, 100% 100%, 0 100%);
-    }
-
-    :host .transparent-checks {
-      ${transparentChex}
-    }
-  `;
+  static styles = inputChannelRules;
 
   clickPreview(e) {
     const w = 128;
@@ -115,12 +37,7 @@ export class ColorInputChannel extends LitElement {
     this.c[this.channel] = val ?? Number(this.renderRoot.querySelector('input').value);
     let c = Color.parse(this.c);
     this.c = this.group === 'rgb' ? this.color.rgbObj : this.isHsl ? this.color.hsl : this.color.hsv;
-    let event = new CustomEvent('color-update', {
-      bubbles: true,
-      composed: true,
-      detail: { c }
-    });
-    this.renderRoot.dispatchEvent(event);
+    colorEvent(this.renderRoot, c);
   };
 
   setActive(active) {
@@ -129,8 +46,6 @@ export class ColorInputChannel extends LitElement {
 
   constructor() {
     super();
-    this.color = {};
-    this.previewGradient = {};
   }
 
   setPreviewGradient() {
@@ -148,7 +63,7 @@ export class ColorInputChannel extends LitElement {
       if (ch === 'h') {
         max = this.max = 360;
         this.previewGradient = {
-          '--preview': `linear-gradient(90deg, ${hueGradient(24)})`,
+          '--preview': `linear-gradient(90deg, ${hueGradient(24, c)})`,
           '--pct': `${100 * (c.h / max)}%`
         };
         return;
@@ -165,7 +80,6 @@ export class ColorInputChannel extends LitElement {
     minC = Color.parse(minC);
     maxC[this.channel] = max;
     maxC = Color.parse(maxC);
-
     if (this.channel === 'l') {
       let midC = { ...c };
       midC.l = 50;
@@ -186,12 +100,11 @@ export class ColorInputChannel extends LitElement {
   }
 
   render() {
-    //let c = this.group === 'rgb' ? this.color : this.color.hsl;
     return html`
       <div class='${classMap({ active: this.active })}'>
-        <label>${this.channel.toUpperCase()}</label>
-        <input
-          class='form-control' .value='${this.v}'
+        <label for=channel_${this.ch}>${this.channel.toUpperCase()}</label>
+        <input id=channel_${this.ch}
+          class='form-control' .value='${Math.round(this.v)}'
           type='number' min='0' max='${this.max}'
           @input='${this.valueChange}'
           @focus='${() => this.setActive(true)}'

@@ -20,11 +20,11 @@ npm i color-picker
     cp.style.display = 'none';
     button.value = cp.color.hex;
     console.log({ cp })
-    cp.addEventListener('preview', ({detail:{color}}) => {
-      console.log({ picked: color, hex: color.hex, rgb: color.css });
+    cp.addEventListener('preview', ({detail: {color}}) => {
+      console.log({ preview: color, hex: color.hex, rgb: color.css });
       button.value = color.hex;
     });
-    cp.addEventListener('picked', ({detail:{color}}) => {
+    cp.addEventListener('picked', ({detail: {color}}) => {
       button.value = color.hex;
       cp.style.display = 'none';
     });
@@ -32,7 +32,7 @@ npm i color-picker
       e.stopImmediatePropagation();
       e.preventDefault();
       cp.style.display = 'block';
-    })
+    });
   });
 </script>
 
@@ -45,7 +45,7 @@ npm i color-picker
 ```
 
 ## Events
-Fires a 'color-picked' event with a color object in the event detail 
+Fires a 'picked' (click OK) and 'preview' (any mutation) event with a color object in the event detail 
 
 ## Local Demo with `web-dev-server`
 

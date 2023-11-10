@@ -599,21 +599,4 @@ export class Color {
   }
 }
 
-export const hueGradient = (gran = 3) => {
-  let h = 0;
-  const s = 100;
-  const l = 50;
-  const stops = [];
-  let color, pos;
-  const cs = (color,pos) => `${Color.parse(color).css} ${(pos * 100).toFixed(1)}%`
-  while (h < 360) {
-    color = {h, s, l};
-    pos = h / 360;
-    stops.push(cs(color,pos));
-    h += gran;
-  }
-  color = Color.parse({h: 359, s, l});
-  pos = 1;
-  stops.push(cs(color,pos));
-  return stops.join(', ');
-};
+

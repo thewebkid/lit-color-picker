@@ -8,129 +8,21 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { HueBar } from './HueBar.js';
 import { ColorInputChannel } from './ColorInputChannel.js';
 import { HSLCanvas } from './HSLCanvas.js';
-import { focusedFormControl, formControl, transparentChex } from './css.js';
+import { focusedFormControl, formControl, root, transparentChex } from './css.js';
+import { colorEvent, copy } from './lib.js';
 
 
 //todo: light/dark mode + get decorators working without typescript
 export class ColorPicker extends LitElement {
   static properties = {
-    color: { type: Object },
-    hex: {type: String},
-    value:{type:String, attribute:true},
-    isHsl: { type: Boolean }
+    color: { type: Object, state:true, attribute:false },
+    hex: { type: String, state:true, attribute:false},
+    value: { type:String },
+    isHsl: { type: Boolean, state:true, attribute:false },
+    copied:{type:String}
   };
 
-  static styles = css`
-    :host > .outer {
-      --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      position: relative;
-      background-color: rgb(30 41 59);
-      height: 250px;
-      width: 400px;
-      display: block;
-      padding: 10px;
-      margin: 10px;
-      box-shadow: 0 4px 12px #111;
-    }
-    .d-flex {
-      display: flex;
-      width: 100%;
-      margin-top: 15px;
-    }
-    .w-30 {
-      width: 30%;
-    }
-    .w-40 {
-      width: 40%;
-      position: relative;
-      height:210px;
-    }
-    :host .form-control {
-      ${formControl}
-    }
-    :host .form-control:focus {
-      ${focusedFormControl}
-    }
-    :host label {
-      width: 12px;
-      display: inline-block;
-      color: #ccc;
-      font-family: var(--font-fam);
-    }
-    :host .hsl-mode{
-      padding-left:16px;
-      margin-top:18px;
-    }
-    :host a.button{
-      padding: .325rem .5rem;
-      background-color: #020617;
-      border: 1px solid #495057;
-      font-family: var(--font-fam);
-      color:#ddd;
-      cursor: pointer;
-      font-size: .9rem;
-    }
-    :host div.hex{
-      margin-top:27px;
-      white-space: nowrap;
-    }
-    :host div.hex input{
-      border-bottom-right-radius: 0;
-      border-top-right-radius: 0;
-    }
-    :host a.button.copy{
-      padding:7px 7px 5px 4px;
-      position:relative;
-      border-left:0;
-      top:2px;
-    }
-    :host a.button.copy svg{
-      height:15px;
-      width:15px;
-    }
-    :host a.button.l{
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;
-    }
-    :host a.button.r{
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;
-    }
-    :host a.button.active{
-      color: #eee;
-      background-color: #0C5B9D;
-      cursor:default;
-    }
-    :host .ok{
-      position:absolute;
-      bottom:0;
-      right:0;
-    }
-    :host .ok a{
-      border-radius:3px;
-      padding:6px 12px;
-    }
-    :host .swatch{
-      height:14px;
-      width:14px;
-      display: inline-block;
-      position:relative;
-      top:2px;
-      margin-left:3px;
-    }
-    :host .swatch span{
-      position: absolute;
-      z-index: 1;
-      top:0;
-      left:0;
-      height:100%;
-      width:100%;
-    }
-    :host .swatch span.checky{
-      ${transparentChex}
-      z-index: 0;
-    }
-  `;
+  static styles = root;
 
   _color;
 
@@ -155,17 +47,12 @@ export class ColorPicker extends LitElement {
     if (c) {
       this.hex = c.hex;
       this._color = c;
-      const event = new CustomEvent('preview', {
-        bubbles: true,
-        composed: true,
-        detail: { color: c }
-      });
-      this.renderRoot.dispatchEvent(event);
+      colorEvent(this.renderRoot, c, 'preview');
     }
   }
 
-  updateColor({ detail: { c } }) {
-    this.color = c;
+  updateColor({ detail: { color } }) {
+    this.color = color;
   }
 
   setColor(c) {
@@ -184,18 +71,41 @@ export class ColorPicker extends LitElement {
   }
 
   okColor(){
-    const event = new CustomEvent('picked', {
-      bubbles: true,
-      composed: true,
-      detail: { color: this.color }
-    });
-    this.renderRoot.dispatchEvent(event);
+    colorEvent(this.renderRoot, this.color, 'picked');
+  }
+  showCopyDialog(){
+    this.copied = null;
+    this.dlg = this.dlg ?? this.renderRoot.querySelector('dialog');
+    if (this.dlg.open){
+      this.dlg.classList.remove('open')
+      return this.dlg.close();
+    }
+
+    this.dlg.show();
+    this.dlg.classList.add('open');
+  }
+  clipboard(f){
+    let s = this.color.toString(f)
+    navigator.clipboard.writeText(s);
+    this.hideCopyDialog(s);
+  }
+  hideCopyDialog(copyText){
+    if (copyText){
+      this.copied = copyText;
+      setTimeout(()=>this.dlg.classList.remove('open'),400);
+      setTimeout(()=>this.hideCopyDialog(),1200);
+      return
+    }
+    this.dlg.classList.remove('open')
+    this.dlg.close();
+    this.copied = null;
   }
   render() {
     const hslChannels = this.isHsl ? ['h', 's', 'l'] : ['h', 's', 'v'];
     const hsvClass = { button: true, active: !this.isHsl, l:true };
     const hslClass = { button: true, active: this.isHsl,r:true };
     let swatchBg = {backgroundColor:this.color};
+    let hideCopied = this.copied ? {textAlign:'center',display: 'block'} : {display:'none',}
     return html`
       <div class='outer'>
         <hue-bar hue='${this.color.hsl.h}' @hue-update='${this.setHue}'></hue-bar>
@@ -206,10 +116,32 @@ export class ColorPicker extends LitElement {
                 group="rgb" channel="${c}" isHsl="${this.isHsl}"
                 .color="${this.color}" @color-update="${this.updateColor}" />
             `)}<div class='hex'>
-            <label>#</label>
-            <input @input='${(e) => this.setColor(e)}' class='form-control' placeholder='Set color'
-                   .value='${this.color.hex}' /><a class='button copy' title='Copy+formats TBA'><!-- TODO: wire -->
-              <svg stroke='currentColor' fill='none' stroke-width='0' viewBox='0 0 24 24'><path d='M13 7H7V5H13V7Z' fill='currentColor'></path><path d='M13 11H7V9H13V11Z' fill='currentColor'></path><path d='M7 15H13V13H7V15Z' fill='currentColor'></path><path fill-rule='evenodd' clip-rule='evenodd' d='M3 19V1H17V5H21V23H7V19H3ZM15 17V3H5V17H15ZM17 7V19H9V21H19V7H17Z' fill='currentColor'></path></svg></a>
+              <dialog @blur=${()=>this.hideCopyDialog()} tabindex='0'>
+                <sub class='copied' style='${styleMap(hideCopied)}'>copied <em>${this.copied}</em></sub>
+                ${this.copied ? html`` : html`
+                <div>
+                  <input class='form-control' disabled='disabled' value='${this.color.hex}'>
+                  <a title='Copy HEX String' class='button' tabindex='0' @click=${(e)=>this.clipboard('hex',e)}>${copy}</a>
+                </div>
+                <div>
+                  <input class='form-control' disabled='disabled' value='${this.color.css}'>
+                  <a title='Copy RGB String' class='button' tabindex='0' @click=${(e)=>this.clipboard('css',e)}>${copy}</a>
+                </div>
+                <div>
+                  <input class='form-control' disabled='disabled' value='${this.color.toString('hsl')}'>
+                  <a title='Copy HSL String' class='button' tabindex='0' @click=${(e)=>this.clipboard('hsl',e)}>${copy}</a>
+                </div>
+                `}
+
+              </dialog>
+              <label>#</label>
+              <input @input='${(e) => this.setColor(e)}' class='form-control' placeholder='Set color'
+                     .value='${this.color.hex}' /><a
+                @click=${this.showCopyDialog} class='button copy' title='Copy+formats TBA'><!-- TODO: wire -->
+                ${copy}
+                <span>&#11205;</span>
+              </a>
+
             </div>
           </div>
           <div class='col w-30'>

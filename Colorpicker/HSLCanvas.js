@@ -1,22 +1,22 @@
 import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
 import { Color } from './Color';
+import { colorEvent } from './lib.js';
 
 export class HSLCanvas extends LitElement {
   static properties = {
     color: { type: Object },
-    ctx: { type: Object },
-    hsw: { type: Object },
     isHsl: { type: Boolean },
     size: { type: Number, attribute: true },
-    circlePos: { type: Object }
+    ctx: { type: Object, state: true, attribute:false },
+    hsw: { type: Object, state: true, attribute:false },
+    circlePos: { type: Object, state: true, attribute:false }
   };
   static styles = css`
     :host .outer {
       position: absolute;
       top: 0;
       right: 0;
-
     }
 
     :host .outer canvas {
@@ -46,14 +46,7 @@ export class HSLCanvas extends LitElement {
 
   setColor(c) {
     //this.color = c;
-    let target = this.renderRoot.querySelector('.outer');
-    let event = new CustomEvent('color-update', {
-      bubbles: true,
-      composed: true,
-      detail: { c }
-    });
-
-    target.dispatchEvent(event);
+    colorEvent(this.renderRoot,c);
   }
 
   setCircleCss(x, y) {

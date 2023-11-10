@@ -23,11 +23,11 @@
       cp.style.display = 'none';
       button.value = cp.color.hex;
       console.log({ cp })
-      cp.addEventListener('preview', ({detail:{color}}) => {
-        console.log({ picked: color, hex: color.hex, rgb: color.css });
+      cp.addEventListener('preview', ({detail: {color}}) => {
+        console.log({ preview: color, hex: color.hex, rgb: color.css });
         button.value = color.hex;
       });
-      cp.addEventListener('picked', ({detail:{color}}) => {
+      cp.addEventListener('picked', ({detail: {color}}) => {
         button.value = color.hex;
         cp.style.display = 'none';
       });
@@ -35,7 +35,7 @@
         e.stopImmediatePropagation();
         e.preventDefault();
         cp.style.display = 'block';
-      })
+      });
     });
   </script>
 
