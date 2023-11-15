@@ -17,8 +17,11 @@ module.exports = {
     'no-unused-vars': [1, { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
     "template-curly-spacing": "off"
   },
-  "plugins": ["lit-a11y"],
-  parserOptions: {
-    parser: 'babel-eslint'
+  plugins: ["lit-a11y"],
+
+  "parserOptions": {
+    parser: 'babel-eslint',
+    ecmaVersion:2023,
+    "sourceType": "module"
   }
 };

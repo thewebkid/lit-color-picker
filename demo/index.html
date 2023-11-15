@@ -23,11 +23,13 @@
       cp.style.display = 'none';
       button.value = cp.color.hex;
       console.log({ cp })
-      cp.addEventListener('preview', ({detail: {color}}) => {
+      cp.addEventListener('colorchanged', (event) => {
+        const { color } = event.detail;
         console.log({ preview: color, hex: color.hex, rgb: color.css });
         button.value = color.hex;
       });
-      cp.addEventListener('picked', ({detail: {color}}) => {
+      cp.addEventListener('colorpicked', (event) => {
+        const { color } = event.detail;
         button.value = color.hex;
         cp.style.display = 'none';
       });
@@ -45,7 +47,6 @@
     Pick a color
     <input type='color' value='#000000'/>
   </label>
-  <color-picker value="steelblue"></color-picker>
-
+  <color-picker value="steelblue" id='cp'></color-picker>
 </body>
 </html>

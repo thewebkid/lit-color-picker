@@ -10,7 +10,7 @@ import { ColorInputChannel } from './ColorInputChannel.js';
 import { HSLCanvas } from './HSLCanvas.js';
 import { focusedFormControl, formControl, root, transparentChex } from './css.js';
 import { colorEvent, copy } from './lib.js';
-
+import {LitMovable} from 'lit-movable';
 
 //todo: light/dark mode + get decorators working without typescript
 export class ColorPicker extends LitElement {
@@ -43,11 +43,11 @@ export class ColorPicker extends LitElement {
   }
 
   set color(c) {
-    c = Color.parse(c);
+    c = c.hsx ? c : c.rgba ? Color.parse(...c.rgba) : Color.parse(c);
     if (c) {
       this.hex = c.hex;
       this._color = c;
-      colorEvent(this.renderRoot, c, 'preview');
+      colorEvent(this.renderRoot, c, 'colorchange');
     }
   }
 
@@ -71,7 +71,7 @@ export class ColorPicker extends LitElement {
   }
 
   okColor(){
-    colorEvent(this.renderRoot, this.color, 'picked');
+    colorEvent(this.renderRoot, this.color, 'colorpicked');
   }
   showCopyDialog(){
     this.copied = null;
@@ -85,6 +85,7 @@ export class ColorPicker extends LitElement {
     this.dlg.classList.add('open');
   }
   clipboard(f){
+    console.log(f)
     let s = this.color.toString(f)
     navigator.clipboard.writeText(s);
     this.hideCopyDialog(s);
@@ -108,7 +109,7 @@ export class ColorPicker extends LitElement {
     let hideCopied = this.copied ? {textAlign:'center',display: 'block'} : {display:'none',}
     return html`
       <div class='outer'>
-        <hue-bar hue='${this.color.hsl.h}' @hue-update='${this.setHue}'></hue-bar>
+        <hue-bar hue='${this.color.hsx ? this.color.hsx.h : this.color.hsl.h}' @hue-update='${this.setHue}'></hue-bar>
         <div class='d-flex'>
           <div class='col w-30'>
             ${['r', 'g', 'b', 'a'].map(c => html`
@@ -119,18 +120,18 @@ export class ColorPicker extends LitElement {
               <dialog @blur=${()=>this.hideCopyDialog()} tabindex='0'>
                 <sub class='copied' style='${styleMap(hideCopied)}'>copied <em>${this.copied}</em></sub>
                 ${this.copied ? html`` : html`
-                <div>
+                <a class='copy-item' @click=${(e)=>this.clipboard('hex',e)}>
                   <input class='form-control' disabled='disabled' value='${this.color.hex}'>
-                  <a title='Copy HEX String' class='button' tabindex='0' @click=${(e)=>this.clipboard('hex',e)}>${copy}</a>
-                </div>
-                <div>
+                  <button title='Copy HEX String' class='button' tabindex='0'>${copy}</button>
+                </a>
+                <a class='copy-item' @click=${(e)=>this.clipboard('css',e)}>
                   <input class='form-control' disabled='disabled' value='${this.color.css}'>
-                  <a title='Copy RGB String' class='button' tabindex='0' @click=${(e)=>this.clipboard('css',e)}>${copy}</a>
-                </div>
-                <div>
-                  <input class='form-control' disabled='disabled' value='${this.color.toString('hsl')}'>
-                  <a title='Copy HSL String' class='button' tabindex='0' @click=${(e)=>this.clipboard('hsl',e)}>${copy}</a>
-                </div>
+                  <button title='Copy RGB String' class='button' tabindex='0'>${copy}</button>
+                </a>
+                <a class='copy-item' @click=${(e)=>this.clipboard(this.color.alpha < 1 ? 'hsla' : 'hsl', e)}>
+                  <input class='form-control' disabled='disabled' value='${this.color.toString(this.color.alpha < 1 ? 'hsla' : 'hsl')}'>
+                  <button title='Copy HSL String' class='button' tabindex='0'>${copy}</button>
+                </a>
                 `}
 
               </dialog>
@@ -157,7 +158,7 @@ export class ColorPicker extends LitElement {
           <div class='w-40'>
             <hsl-canvas
               size='${160}' .isHsl='${this.isHsl}'
-              .color='${this.color}' @color-update='${this.updateColor}' ></hsl-canvas>
+              .color='${this.color}' @color-update='${this.updateColor}'></hsl-canvas>
             <div class='ok'>
               <a class='button' @click=${this.okColor}>OK
                 <span class='swatch'>

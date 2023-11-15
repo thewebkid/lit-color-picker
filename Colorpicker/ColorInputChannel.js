@@ -36,6 +36,9 @@ export class ColorInputChannel extends LitElement {
   valueChange = (e, val = null) => {
     this.c[this.channel] = val ?? Number(this.renderRoot.querySelector('input').value);
     let c = Color.parse(this.c);
+    if (this.group !== 'rgb'){
+      c.hsx = this.c;
+    }
     this.c = this.group === 'rgb' ? this.color.rgbObj : this.isHsl ? this.color.hsl : this.color.hsv;
     colorEvent(this.renderRoot, c);
   };
@@ -49,7 +52,17 @@ export class ColorInputChannel extends LitElement {
   }
 
   setPreviewGradient() {
-    let c = this.c = this.group === 'rgb' ? this.color.rgbObj : this.isHsl ? this.color.hsl : this.color.hsv;
+    let c;
+    if (this.group === 'rgb'){
+      c = this.color.rgbObj;
+    }else {
+      if (this.color.hsx) {
+        c = this.color.hsx;
+      } else {
+        c = this.isHsl ? this.color.hsl : this.color.hsv;
+      }
+    }
+    this.c = c;
     let g = this.group;
     let ch = this.channel;
     const isAlpha = ch === 'a';

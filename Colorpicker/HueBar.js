@@ -8,6 +8,7 @@ export class HueBar extends LitElement {
     hue: { type: Number },
     gradient: { type: String, attribute: false },
     sliderStyle: { type: String, attribute: false},
+    sliderBounds: {type: Object},
     width: { type: Number, attribute: false }
   };
   static styles = css`
@@ -35,24 +36,33 @@ export class HueBar extends LitElement {
     this.gradient = { backgroundImage: `linear-gradient(90deg, ${hueGradient(24)})` };
     this.width = 400;
     this.sliderStyle = { display: 'none' };
-    this.init();
+
   }
 
-  async init() {
-    await this.updateComplete;
+  firstUpdated() {
+    let me = this.renderRoot.querySelector('lit-movable');
+    me.onmove = ({ posLeft }) => this.selectHue({offsetX: posLeft});
     this.sliderStyle = this.sliderCss(this.hue);
   }
 
+  get sliderBounds(){
+    let r = this.width / 360;
+    let posLeft = Number(this.hue) * r;
+    let min = 0 - posLeft;
+    let max = this.width - posLeft;
+    return {min, max, posLeft};
+  }
   get sliderCss() {
     return (h) => {
-      let r = this.width / 360;
-      let left = Number(h) * r;
+
       let color = Color.fromHsl({ h, s: 100, l: 50 });
-      return isFinite(h) ? { left: `${left}px`, backgroundColor: color.css } : { display: 'none' };
+
+      return isFinite(h) ? { backgroundColor: color.css } : { display: 'none' };
     };
   }
 
   updateHue(e) {
+    debugger;
     let target = this.renderRoot.querySelector('input');
     let event = new CustomEvent('hue-update', {
       bubbles: true,
@@ -65,7 +75,10 @@ export class HueBar extends LitElement {
 
   willUpdate(props) {
     let h = props.get('hue');
-    if (isFinite(h)) {
+    if (h && isFinite(this.hue)) {
+      if (this.color?.hsx){
+        return; // console.log({hueBarIgnored: this.color.hsx});
+      }
       let hue = this.hue;
       this.sliderStyle = this.sliderCss(hue);
     }
@@ -74,7 +87,7 @@ export class HueBar extends LitElement {
   selectHue(e) {
     let r = 360 / this.width;
     let l = e.offsetX;
-    let h = Math.round(l * r);
+    let h = Math.max(0,Math.min(359,Math.round(l * r)));
     let target = this.renderRoot.querySelector('a');
     let event = new CustomEvent('hue-update', {
       bubbles: true,
@@ -90,7 +103,10 @@ export class HueBar extends LitElement {
 
     return html`
       <div style=${styleMap(this.gradient)} class='bar' @click='${this.selectHue}'>
-        <a class='slider' style=${styleMap(this.sliderStyle)}></a>
+        <lit-movable horizontal='${this.sliderBounds.min}, ${this.sliderBounds.max}' posLeft='${this.sliderBounds.posLeft}'>
+          <a class='slider' style=${styleMap(this.sliderStyle)}></a>
+        </lit-movable>
+
       </div>`;
   }
 }

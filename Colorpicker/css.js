@@ -73,7 +73,7 @@ export const root = css`
       padding-left:16px;
       margin-top:18px;
     }
-    :host a.button{
+    :host .button{
       padding: .325rem .5rem;
       background-color: #020617;
       border: 1px solid #495057;
@@ -125,30 +125,46 @@ export const root = css`
   :host dialog *{
     color:#ddd;
   }
-  :host dialog div{
+  :host dialog a.copy-item{
     margin-bottom:5px;
+    white-space: nowrap;
+    display: block;
+    width: 180px;
+    cursor: pointer;
   }
   :host dialog input.form-control{
     font-size: 12px;
     display: inline-block;
     vertical-align: middle;
-    width:120px;
+    width:132px;
     padding-bottom: 2px;
     border-bottom-right-radius: 4px;
     border-top-right-radius: 4px;
+    pointer-events: none;
   }
-  :host dialog a.button{
+  :host dialog button.button{
     display: inline-block;
     vertical-align: middle;
     margin-left:-5px;
     font-size: 12px;
     height:27px;
     width:27px;
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
     box-sizing: border-box;
     overflow: hidden;
     outline:none;
+    background-color: transparent;
   }
-  :host dialog a.button svg{
+  :host dialog a.copy-item:hover .button,
+  :host dialog a.copy-item:hover input.form-control,
+  :host dialog a.copy-item:hover path{
+    color:#111;
+    background-color: steelblue;
+    fill:#111;
+    cursor: pointer;
+  }
+  :host dialog .button svg{
      height:15px;
      width:15px;
      margin-left:-3px;
@@ -159,7 +175,7 @@ export const root = css`
       vertical-align: middle;
       display: inline-block;
     }
-    :host a.button.copy{
+    :host .button.copy{
       padding:7px 7px 5px 4px;
       position:relative;
       border-left:0;
@@ -171,11 +187,11 @@ export const root = css`
       overflow: hidden;
       vertical-align: middle;
     }
-    :host a.button.copy svg{
+    :host .button.copy svg{
       height:15px;
       width:15px;
     }
-  :host a.button.copy span{
+  :host .button.copy span{
     font-size: 10px;
     position:relative;
     top:-2px;

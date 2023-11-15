@@ -2,15 +2,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
 import { Color } from './Color';
 import { colorEvent } from './lib.js';
+import {LitMovable} from 'lit-movable';
 
 export class HSLCanvas extends LitElement {
   static properties = {
     color: { type: Object },
     isHsl: { type: Boolean },
     size: { type: Number, attribute: true },
-    ctx: { type: Object, state: true, attribute:false },
-    hsw: { type: Object, state: true, attribute:false },
-    circlePos: { type: Object, state: true, attribute:false }
+    ctx: { type: Object, state: true, attribute: false },
+    hsw: { type: Object, state: true, attribute: false },
+    circlePos: { type: Object, state: true, attribute: false }
   };
   static styles = css`
     :host .outer {
@@ -37,22 +38,26 @@ export class HSLCanvas extends LitElement {
     }
   `;
 
+
+
   constructor() {
     super();
     this.isHsl = true;
-    this.circlePos = { top: '0px', left: '0px' };
+    this.circlePos = { top: 0, left: 0, bounds: {x: '', y: ''} };
     this.size = 160;
   }
 
   setColor(c) {
     //this.color = c;
-    colorEvent(this.renderRoot,c);
+    colorEvent(this.renderRoot, c);
   }
 
   setCircleCss(x, y) {
-    let left = `${x}px`;
-    let top = `${y}px`;
-    this.circlePos = { top, left };
+    let left = `${x}`;
+    let top = `${y}`;
+    let bounds = {x: `0, ${this.size}`, y: `0,${this.size}`};
+    //let bounds = {x: `${-x}, ${this.size-x}`,y:`${-y},${this.size-y}`}
+    this.circlePos = { top, left, bounds};
   }
 
   pickCoord({ offsetX, offsetY }) {
@@ -63,17 +68,20 @@ export class HSLCanvas extends LitElement {
     let w = (size - y) / size;
     w = Math.round(w * 100);
     let sat = Math.round((x / size) * 100);
-    let hsx = { h: hsw.h, s: sat };
-    let c = isHsl ? Color.fromHsl({ ...hsx, l: w })
-      : Color.fromHsv({ ...hsx, v: w });
+    let hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']:w };
+
+    let c = isHsl ? Color.fromHsl(hsx)
+      : Color.fromHsv(hsx);
     this.setCircleCss(x, y);
     c.a = color.alpha;
+    c.hsx = hsx;
+    c.fromHSLCanvas = true;
     this.setColor(c);
   }
 
   // todo: test assumption that this perf lag (lit warning)
   //  is ok due to rendering canvas post update
-  paintHSL() {
+  paintHSL(hsx) {
     const { ctx, color, isHsl, size } = this;
     if (!ctx) {
       return;
@@ -81,7 +89,7 @@ export class HSLCanvas extends LitElement {
     //console.time('paint')
 
     let clr = color;
-    let hsx = isHsl ? clr.hsl : clr.hsv; // hue-sat-whatever
+    hsx = hsx ?? isHsl ? clr.hsl : clr.hsv; // hue-sat-whatever
     hsx.w = isHsl ? hsx.l : hsx.v;
     let { h, s, w } = hsx;
     let hsw = this.hsw = { h, s, w };
@@ -97,14 +105,19 @@ export class HSLCanvas extends LitElement {
         ctx.fillRect(s, w, (s + incr), (w + incr));
       }
     }
-    let left = `${hsw.s * scale}px`;
-    let top = `${size - (hsx.w * scale)}px`;
-    this.circlePos = { top, left };
-    //console.timeEnd('paint')
+
+    this.setCircleCss(hsw.s * scale, size - (hsx.w * scale));
   }
 
   willUpdate(props) {
     if (props.has('color') || props.has('isHsl')) {
+      if (this.color?.hsx){
+        if (this.color.fromHSLCanvas){
+          delete this.color.fromHSLCanvas;//avoid extra paint job
+          return;
+        }
+        return this.paintHSL(this.color.hsx);
+      }
       this.paintHSL();
     }
   }
@@ -115,12 +128,21 @@ export class HSLCanvas extends LitElement {
     this.paintHSL();
   }
 
+  circleMove({posTop: offsetY, posLeft: offsetX}){
+    this.pickCoord({offsetX, offsetY});
+  }
+
   render() {
-    let hw = { height: this.size + 'px', width: this.size + 'px' };
+    let hw = { height: this.size + 'p', width: this.size + 'px' };
+    let {top, left, bounds} = this.circlePos;
     return html`
       <div class='outer' @click='${this.pickCoord}' style='${styleMap(hw)}'>
         <canvas height='100' width='100'></canvas>
-        <div class='circle' style='${styleMap(this.circlePos)}'></div>
+        <lit-movable
+          eventsOnly='${true}' boundsX='${bounds.x}' boundsY='${bounds.y}'
+          .posTop='${top}' .posLeft='${left}' .onmove='${(e) => this.circleMove(e)}'>
+          <div class='circle'></div>
+        </lit-movable>
       </div>`;
   }
 }

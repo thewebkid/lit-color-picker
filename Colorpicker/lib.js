@@ -14,7 +14,7 @@ export const hueGradient = (gran = 3, hsx) => {
   let h = 0;
   let s = 100;
   let l = 50;
-  let v = null
+  let v = null;
   let isHsv = false;
   if (hsx){
     s = hsx.s;
