@@ -55,9 +55,12 @@ export class ColorPicker extends LitElement {
     this.color = color;
   }
 
-  setColor(c) {
-    const cs = this.renderRoot.querySelector('input').value;
-    this.color = Color.parse(cs);
+  setColor(e) {
+    const cs = this.renderRoot.querySelector('input#hex').value;
+    const c = Color.parse(cs);
+    if (c) {
+      this.color = c;
+    }
   }
 
   setHue({ detail: { h } }) {
@@ -136,8 +139,8 @@ export class ColorPicker extends LitElement {
 
               </dialog>
               <label>#</label>
-              <input @input='${(e) => this.setColor(e)}' class='form-control' placeholder='Set color'
-                     .value='${this.color.hex}' /><a
+              <input @input='${this.setColor}' class='form-control' id='hex' placeholder='Set color'
+                     .value='${this.hex}' /><a
                 @click=${this.showCopyDialog} class='button copy' title='Copy+formats TBA'><!-- TODO: wire -->
                 ${copy}
                 <span>&#11205;</span>

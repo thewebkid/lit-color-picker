@@ -1,12 +1,13 @@
 import {css} from 'lit';
-export const transparentChex = css`height: 100%;
-      width: 100%;
-      position: absolute;
-      z-index: -1;
-      background: linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), #fff;
-      background-repeat: repeat, repeat;
-      background-position: 0 0, 6px 6px;
-      background-size: 12px 12px, 12px 12px;
+export const transparentChex = css`
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: -1;
+  background: linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.125) 25%, transparent 0, transparent 75%, rgba(0, 0, 0, 0.125) 0, rgba(0, 0, 0, 0.125) 0), #fff;
+  background-repeat: repeat, repeat;
+  background-position: 0 0, 6px 6px;
+  background-size: 12px 12px, 12px 12px;
 `;
 
 export const formControl = css`
@@ -16,33 +17,47 @@ export const formControl = css`
   font-size: .9rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #ccc;
+  color: var(--input-color);
   appearance: none;
-  background-color: #020617;
+  background-color: var(--input-bg);
   background-clip: padding-box;
-  border: 1px solid #495057;
+  border: 1px solid var(--form-border-color);
   border-radius: 3px;
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 `;
 export const focusedFormControl = css`
-  color: #333;
-  background-color: rgb(148 163 184);
-  border-color: #86b7fe;
+  color: var(--input-active-color);
+  background-color: var(--input-active-bg);
+  border-color: var(--input-active-border-color);
   outline: 0;
-  box-shadow: 0 2px 5px #ccc;
+  box-shadow: var(--input-active-box-shadow);
 `;
 
 export const root = css`
+  :host{
+    --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --bg-color:rgb(30 41 59);
+    --label-color: #ccc;
+    --form-border-color: #495057;
+    --input-active-border-color: #86b7fe;
+    --input-bg: #020617;
+    --input-active-bg: #4682B4;
+    --input-color: #ccc;
+    --input-active-color: #333;
+    --input-active-box-shadow: 0 2px 5px #ccc;
+    --button-active-bg: #0C5B9D;
+    --button-active-color:white;
+    --outer-box-shadow:0 4px 12px #111;
+  }
     :host > .outer {
-      --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
       position: relative;
-      background-color: rgb(30 41 59);
+      background-color: var(--bg-color);
       height: 250px;
       width: 400px;
       display: block;
       padding: 10px;
       margin: 10px;
-      box-shadow: 0 4px 12px #111;
+      box-shadow: var(--outer-box-shadow);
     }
     .d-flex {
       display: flex;
@@ -66,7 +81,7 @@ export const root = css`
     :host label {
       width: 12px;
       display: inline-block;
-      color: #ccc;
+      color: var(--label-color);
       font-family: var(--font-fam);
     }
     :host .hsl-mode{
@@ -75,10 +90,10 @@ export const root = css`
     }
     :host .button{
       padding: .325rem .5rem;
-      background-color: #020617;
-      border: 1px solid #495057;
+      background-color: var(--input-bg);
+      border: 1px solid var(--form-border-color);
       font-family: var(--font-fam);
-      color:#ddd;
+      color:var(--input-color);
       cursor: pointer;
       font-size: .9rem;
     }
@@ -96,34 +111,15 @@ export const root = css`
     z-index: 3;
     border: 1px solid transparent;
     outline:transparent;
-    box-shadow: 0 4px 12px #111;
-    background-color:  #020617;
+    box-shadow:var(--outer-box-shadow);
+    background-color: var(--input-bg);
     transition: opacity .3s;
   }
   :host dialog.open{
     opacity: 1;
   }
-
-  /*:host dialog.closed{
-    opacity: 0;
-    transition: opacity .3s;
-  }*/
-  /*
-  @keyframes show-dialog {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  @keyframes hide-dialog{
-    to {
-      opacity: 0;
-    }
-  }*/
   :host dialog *{
-    color:#ddd;
+    color:var(--input-color);
   }
   :host dialog a.copy-item{
     margin-bottom:5px;
@@ -159,9 +155,9 @@ export const root = css`
   :host dialog a.copy-item:hover .button,
   :host dialog a.copy-item:hover input.form-control,
   :host dialog a.copy-item:hover path{
-    color:#111;
-    background-color: steelblue;
-    fill:#111;
+    color:var(--button-active-color);
+    background-color: var(--button-active-bg);
+    fill:var(--button-active-color);
     cursor: pointer;
   }
   :host dialog .button svg{
@@ -206,7 +202,7 @@ export const root = css`
     }
     :host a.button.active{
       color: #eee;
-      background-color: #0C5B9D;
+      background-color: var(--button-active-bg);
       cursor:default;
     }
     :host .ok{
@@ -238,7 +234,7 @@ export const root = css`
       ${transparentChex}
       z-index: 0;
     }
-  `
+  `;
 export const inputChannelRules = css`
   :host > div {
     margin-bottom: 8px;
@@ -249,7 +245,7 @@ export const inputChannelRules = css`
   :host label {
     width: 12px;
     display: inline-block;
-    color: #ccc;
+    color: var(--label-color);
     font-family: var(--font-fam);
   }
 
@@ -285,8 +281,8 @@ export const inputChannelRules = css`
     bottom: -23px;
     right: -9px;
     height: 10px;
-    border: 8px solid #020617;
-    box-shadow: 0 2px 5px #ccc;
+    border: 8px solid var(--input-bg);
+    box-shadow:var(--input-active-box-shadow);
     pointer-events: all;
     z-index: 2;
     cursor: pointer;
@@ -319,4 +315,4 @@ export const inputChannelRules = css`
   :host .transparent-checks {
     ${transparentChex}
   }
-`
+`;

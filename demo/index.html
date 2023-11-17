@@ -20,7 +20,7 @@
     window.addEventListener('load', ()=>{
       const button = document.querySelector('input');
       const cp = document.querySelector('color-picker');
-      cp.style.display = 'none';
+      //cp.style.display = 'none';
       button.value = cp.color.hex;
       console.log({ cp })
       cp.addEventListener('colorchanged', (event) => {

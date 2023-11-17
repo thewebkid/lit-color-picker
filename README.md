@@ -47,6 +47,26 @@ npm i color-picker
 ## Events
 Fires a 'picked' (click OK) and 'preview' (any mutation) event with a color object in the event detail 
 
+## Theming
+Set the following css variables to set a custom theme:
+```css
+color-picker {
+  --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bg-color: rgb(30 41 59);
+  --label-color: #ccc;
+  --form-border-color: #495057;
+  --input-active-border-color: #86b7fe;
+  --input-bg: #020617;
+  --input-active-bg: #4682B4;
+  --input-color: #ccc;
+  --input-active-color: #333;
+  --input-active-box-shadow: 0 2px 5px #ccc;
+  --button-active-bg: #0C5B9D;
+  --button-active-color: white;
+  --outer-box-shadow: 0 4px 12px #111;
+}
+```
+
 ## Local Demo with `web-dev-server`
 
 ```bash
