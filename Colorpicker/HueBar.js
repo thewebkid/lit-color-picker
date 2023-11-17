@@ -6,6 +6,7 @@ import { hueGradient } from './lib.js';
 export class HueBar extends LitElement {
   static properties = {
     hue: { type: Number },
+    color: {type: Object},
     gradient: { type: String, attribute: false },
     sliderStyle: { type: String, attribute: false},
     sliderBounds: {type: Object},
@@ -54,24 +55,14 @@ export class HueBar extends LitElement {
   }
   get sliderCss() {
     return (h) => {
-
-      let color = Color.fromHsl({ h, s: 100, l: 50 });
-
-      return isFinite(h) ? { backgroundColor: color.css } : { display: 'none' };
+      if (this.color.hsx){
+        h = this.color.hsx.h;
+      }
+      let color = Color.parse({ h, s:100, l:50 });
+      return  { backgroundColor: color.css };
     };
   }
 
-  updateHue(e) {
-    debugger;
-    let target = this.renderRoot.querySelector('input');
-    let event = new CustomEvent('hue-update', {
-      bubbles: true,
-      composed: true,
-      detail: { h: Number(target.value) }
-    });
-
-    target.dispatchEvent(event);
-  }
 
   willUpdate(props) {
     let h = props.get('hue');
@@ -104,7 +95,7 @@ export class HueBar extends LitElement {
     return html`
       <div style=${styleMap(this.gradient)} class='bar' @click='${this.selectHue}'>
         <lit-movable horizontal='${this.sliderBounds.min}, ${this.sliderBounds.max}' posLeft='${this.sliderBounds.posLeft}'>
-          <a class='slider' style=${styleMap(this.sliderStyle)}></a>
+          <a class='slider' style=${styleMap(this.sliderCss(this.h))}></a>
         </lit-movable>
 
       </div>`;

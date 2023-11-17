@@ -47,7 +47,8 @@ export class ColorPicker extends LitElement {
     if (c) {
       this.hex = c.hex;
       this._color = c;
-      colorEvent(this.renderRoot, c, 'colorchange');
+
+      colorEvent(this.renderRoot, c, 'colorchanged');
     }
   }
 
@@ -112,7 +113,9 @@ export class ColorPicker extends LitElement {
     let hideCopied = this.copied ? {textAlign:'center',display: 'block'} : {display:'none',}
     return html`
       <div class='outer'>
-        <hue-bar hue='${this.color.hsx ? this.color.hsx.h : this.color.hsl.h}' @hue-update='${this.setHue}'></hue-bar>
+        <hue-bar
+          hue='${this.color.hsx ? this.color.hsx.h : this.color.hsl.h}'
+          @hue-update='${this.setHue}' .color='${this.color}'></hue-bar>
         <div class='d-flex'>
           <div class='col w-30'>
             ${['r', 'g', 'b', 'a'].map(c => html`

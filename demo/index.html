@@ -13,19 +13,62 @@
     input[type=color]{
       width:27px;
     }
+    select,option{
+      background: #212529;
+    }
+    color-picker {
+      --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      --bg-color: rgb(30 41 59);
+      --label-color: #ccc;
+      --form-border-color: #495057;
+      --input-active-border-color: #86b7fe;
+      --input-bg: #020617;
+      --input-active-bg: #4682B4;
+      --input-color: #ccc;
+      --input-active-color: #333;
+      --input-active-box-shadow: 0 2px 5px #ccc;
+      --button-active-bg: #0C5B9D;
+      --button-active-color: #ffffff;
+      --outer-box-shadow: 0 4px 12px #111;
+    }
   </style>
   <script type="module">
     import '../color-picker.js';
-
+    const rules = {
+      '--bg-color': `#1E293B`,
+      '--label-color': `#cccccc`,
+      '--form-border-color': `#495057`,
+      '--input-active-border-color': `#86b7fe`,
+      '--input-bg': `#020617`,
+      '--input-active-bg': `#4682B4`,
+      '--input-color': `#ccc`,
+      '--input-active-color': `#333`,
+      '--button-active-bg': `#0C5B9D`,
+      '--button-active-color': `#ffffff`
+    };
+    const staticRules = {
+      '--font-fam':'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue"',
+      '--input-active-box-shadow':`0 2px 5px #cccccc`,
+      '--outer-box-shadow':'0 4px 12px #111111'
+    }
+    let cp,button;
+    const getMatchedCSSRules = (el, css = el.ownerDocument.styleSheets) =>
+      [].concat(...[...css].map(s => [...s.cssRules||[]])) /* 1 */
+        .filter(r => el.matches(r.selectorText));            /* 2 */
     window.addEventListener('load', ()=>{
-      const button = document.querySelector('input');
-      const cp = document.querySelector('color-picker');
+
+      button = document.querySelector('input[type=color]');
+      cp = document.querySelector('color-picker');
       //cp.style.display = 'none';
       button.value = cp.color.hex;
       console.log({ cp })
       cp.addEventListener('colorchanged', (event) => {
         const { color } = event.detail;
-        console.log({ preview: color, hex: color.hex, rgb: color.css });
+
+        const cssVar = document.querySelector('select').value;
+        cp.shadowRoot.firstElementChild.style.setProperty(cssVar, color.css);
+        const rules = getMatchedCSSRules(cp);
+        console.log({ colorchanged: cp, rules, rgb: color.css,cssVar });
         button.value = color.hex;
       });
       cp.addEventListener('colorpicked', (event) => {
@@ -38,15 +81,65 @@
         e.preventDefault();
         cp.style.display = 'block';
       });
+
+      document.querySelector('select').addEventListener('change',()=>{
+
+        const cssVar = document.querySelector('select').value;
+        let c = rules[cssVar];
+
+        button.value = c;
+        console.log({c,cssVar,bv:button.value})
+        cp.color = c;
+        cp.shadowRoot.firstElementChild.style.setProperty(cssVar, c);
+        button.value = c;
+        const cssOutput = Object.entries({ ...rules, ...staticRules }).map(([rule,color])=>{
+          return `  ${rule}: ${color}`
+        }).join(';\n');
+        document.querySelector('pre').innerHTML = `color-picker{
+${cssOutput}
+}`
+      });
     });
+
   </script>
 
 </head>
 <body>
   <label>
-    Pick a color
+    Use color-picker to theme your color-picker
+    <select>
+      <option selected>--bg-color</option>
+      <option>--label-color</option>
+      <option>--form-border-color</option>
+      <option>--input-active-border-color</option>
+      <option>--input-bg</option>
+      <option>--input-active-bg</option>
+      <option>--input-color</option>
+      <option>--input-active-color</option>
+      <option>--button-active-bg</option>
+      <option>--button-active-color</option>
+
+    </select>
     <input type='color' value='#000000'/>
   </label>
   <color-picker value="steelblue" id='cp'></color-picker>
+  <h3 style='margin:30px 0 0'>Theme:</h3>
+<pre>
+color-picker {
+  --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue";
+  --bg-color: rgb(30 41 59);
+  --label-color: #ccc;
+  --form-border-color: #495057;
+  --input-active-border-color: #86b7fe;
+  --input-bg: #020617;
+  --input-active-bg: #4682B4;
+  --input-color: #ccc;
+  --input-active-color: #333;
+  --input-active-box-shadow: 0 2px 5px #ccc;
+  --button-active-bg: #0C5B9D;
+  --button-active-color: #ffffff;
+  --outer-box-shadow: 0 4px 12px #111;
+}
+</pre>
 </body>
 </html>
