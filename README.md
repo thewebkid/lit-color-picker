@@ -51,7 +51,7 @@ Fires a 'picked' (click OK) and 'preview' (any mutation) event with a color obje
 Set the following css variables to set a custom theme:
 ```css
 color-picker {
-  --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue";
   --bg-color: rgb(30 41 59);
   --label-color: #ccc;
   --form-border-color: #495057;
@@ -66,6 +66,8 @@ color-picker {
   --outer-box-shadow: 0 4px 12px #111;
 }
 ```
+
+Run the demo to use the dynamic theme picker.
 
 ## Local Demo with `web-dev-server`
 
