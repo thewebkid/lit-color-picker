@@ -125,6 +125,7 @@ export class ColorInputChannel extends LitElement {
         />
         <div class='preview-bar' style='${styleMap(this.previewGradient)}' @mousedown='${this.clickPreview}'>
           <div class='pct'></div>
+          <!--Only becomes visible for the alpha channel-->
           <div class='transparent-checks'></div>
         </div>
       </div>`;

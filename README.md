@@ -1,5 +1,5 @@
 # \<color-picker>
-<img src="./demo/screenshot.png" width=600>
+<img src="img/screenshot.png" width=600>
 
 A weekend ramp up project to learn LIT basics. Maybe I can turn this into a shared npm if I can finish/polish (WCAG, best practices, etc.)
 
@@ -69,10 +69,10 @@ color-picker {
 
 Run the demo to use the dynamic theme picker.
 
-## Local Demo with `web-dev-server`
+## Local Dev Server  `vite`
 
 ```bash
-npm start
+npm dev
 ```
 
 To run a local development server that serves the basic demo located in `demo/index.html`
