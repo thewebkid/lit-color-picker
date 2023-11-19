@@ -8,7 +8,7 @@ A color-picker web component (built with Lit 3). This initial version is experim
 ## Installation
 
 ```bash
-npm i color-picker
+npm i lit-colorpicker
 ```
 
 ## Usage
@@ -81,8 +81,7 @@ To run a local development server that serves the working example + theme-choose
 
 
 
-## Run Tests `(@open-wc/testing / @web/test-runner-puppeteer)`
-
+## Run Tests 
 ```bash
 npm test
 ```
