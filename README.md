@@ -20,11 +20,11 @@ npm i color-picker
     cp.style.display = 'none';
     button.value = cp.color.hex;
     console.log({ cp })
-    cp.addEventListener('preview', ({detail: {color}}) => {
+    cp.addEventListener('colorupdated', ({detail: {color}}) => {
       console.log({ preview: color, hex: color.hex, rgb: color.css });
       button.value = color.hex;
     });
-    cp.addEventListener('picked', ({detail: {color}}) => {
+    cp.addEventListener('colorpicked', ({detail: {color}}) => {
       button.value = color.hex;
       cp.style.display = 'none';
     });
@@ -75,4 +75,15 @@ Run the demo to use the dynamic theme picker.
 npm dev
 ```
 
-To run a local development server that serves the basic demo located in `demo/index.html`
+To run a local development server that serves the working example + theme-chooser located in `./index.html`
+
+
+
+## Tests `(@open-wc/testing / @web/test-runner-puppeteer)`
+
+```bash
+npm test
+```
+
+Run tests 
+
