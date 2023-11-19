@@ -1,5 +1,5 @@
 # \<color-picker>[![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-<img src="assets/screenshot.png" width=600>
+<img src="https://thewebkid.com/lit-colorpicker.png" width=600>
 
 A color-picker web component (built with Lit 3). This initial version is experimental. 
 
