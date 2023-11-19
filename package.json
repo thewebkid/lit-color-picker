@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "lit": "^3.0.2",
+    "modern-color": "^1.1.1",
     "lit-movable": "^0.1.7"
   },
   "devDependencies": {

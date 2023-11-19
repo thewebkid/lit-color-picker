@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import { Color } from './Color';
+import { Color } from 'modern-color';
 import { hueGradient } from './lib.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -45,6 +45,7 @@ export class ColorInputChannel extends LitElement {
 
   setActive(active) {
     this.active = active;
+    this.renderRoot.querySelector('input').select();
   }
 
   constructor() {

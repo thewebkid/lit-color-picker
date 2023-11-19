@@ -1,6 +1,6 @@
 import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
-import { Color } from './Color';
+import { Color } from 'modern-color';
 import { colorEvent } from './lib.js';
 import {LitMovable} from 'lit-movable';
 
