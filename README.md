@@ -45,7 +45,7 @@ npm i color-picker
 ```
 
 ## Events
-Fires a 'picked' (click OK) and 'preview' (any mutation) event with a color object in the event detail 
+Fires a 'colorpicked' (when click OK) and 'colorupdated' (any mutation) event with a color object in the event detail. Standard CustomEvent implementation. 
 
 ## Theming
 Set the following css variables to set a custom theme:
@@ -79,11 +79,11 @@ To run a local development server that serves the working example + theme-choose
 
 
 
-## Tests `(@open-wc/testing / @web/test-runner-puppeteer)`
+## Run Tests `(@open-wc/testing / @web/test-runner-puppeteer)`
 
 ```bash
 npm test
 ```
 
-Run tests 
+
 

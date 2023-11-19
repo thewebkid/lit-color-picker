@@ -45,7 +45,9 @@ export class ColorInputChannel extends LitElement {
 
   setActive(active) {
     this.active = active;
-    this.renderRoot.querySelector('input').select();
+    if (active){
+      this.renderRoot.querySelector('input').select();
+    }
   }
 
   constructor() {
