@@ -3,6 +3,8 @@
 
 A color-picker web component (built with Lit 3). This initial version is experimental. 
 
+[Live Demo](http://thewebkid.com/modules/lit-colorpicker)
+
 ## Installation
 
 ```bash
