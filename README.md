@@ -1,7 +1,7 @@
-# \<color-picker>
+# \<color-picker>[![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <img src="assets/screenshot.png" width=600>
 
-A weekend ramp up project to learn LIT basics. Maybe I can turn this into a shared npm if I can finish/polish (WCAG, best practices, etc.)
+A color-picker web component (built with Lit 3). This initial version is experimental. 
 
 ## Installation
 

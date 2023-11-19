@@ -1,6 +1,6 @@
 {
-  "name": "color-picker",
-  "description": "Webcomponent color-picker following open-wc recommendations",
+  "name": "lit-colorpicker",
+  "description": "Colorpicker Web component built with Lit 3",
   "keywords": [
     "web-component",
     "lit",
@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "author": "Ron Gilchrist (thewebkid)",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "main": "index.js",
   "module": "index.js",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "lit": "^3.1.0",
-    "lit-movable": "^0.1.11",
+    "lit-movable": "^0.1.12",
     "modern-color": "^1.1.1"
   },
   "devDependencies": {
