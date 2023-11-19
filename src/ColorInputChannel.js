@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import { Color } from 'modern-color';
+import { Color } from './Color.js';
 import { hueGradient } from './lib.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';

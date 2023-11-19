@@ -1,7 +1,7 @@
 // noinspection ES6UnusedImports
 
 import { css, html, LitElement } from 'lit';
-import { Color, namedColors } from 'modern-color';
+import { Color, namedColors } from './Color.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 // todo: understand why eslint thinks these are unused - they are dependencies
@@ -10,16 +10,16 @@ import { ColorInputChannel } from './ColorInputChannel.js';
 import { HSLCanvas } from './HSLCanvas.js';
 import { focusedFormControl, formControl, root, transparentChex } from './css.js';
 import { colorEvent, copy } from './lib.js';
-import {LitMovable} from 'lit-movable';
+import { LitMovable } from 'lit-movable';
 
 //todo: light/dark mode + get decorators working without typescript
 export class ColorPicker extends LitElement {
   static properties = {
     color: { type: Object, state: true, attribute: false },
-    hex: { type: String, state: true, attribute: false},
+    hex: { type: String, state: true, attribute: false },
     value: { type: String },
     isHsl: { type: Boolean, state: true, attribute: false },
-    copied: {type: String}
+    copied: { type: String }
   };
 
   static styles = root;
@@ -33,7 +33,7 @@ export class ColorPicker extends LitElement {
   }
 
   firstUpdated(props) {
-    if (props.has('value')){
+    if (props.has('value')) {
       this.color = Color.parse(this.value);
     }
   }
@@ -70,17 +70,18 @@ export class ColorPicker extends LitElement {
     this.color = { h, s, l, a };
   }
 
-  setHsl(hsl){
+  setHsl(hsl) {
     this.isHsl = hsl;
   }
 
-  okColor(){
+  okColor() {
     colorEvent(this.renderRoot, this.color, 'colorpicked');
   }
-  showCopyDialog(){
+
+  showCopyDialog() {
     this.copied = null;
     this.dlg = this.dlg ?? this.renderRoot.querySelector('dialog');
-    if (this.dlg.open){
+    if (this.dlg.open) {
       this.dlg.classList.remove('open');
       return this.dlg.close();
     }
@@ -88,14 +89,16 @@ export class ColorPicker extends LitElement {
     this.dlg.show();
     this.dlg.classList.add('open');
   }
-  clipboard(f){
+
+  clipboard(f) {
     console.log(f);
     let s = this.color.toString(f);
     navigator.clipboard.writeText(s);
     this.hideCopyDialog(s);
   }
-  hideCopyDialog(copyText){
-    if (copyText){
+
+  hideCopyDialog(copyText) {
+    if (copyText) {
       this.copied = copyText;
       setTimeout(() => this.dlg.classList.remove('open'), 400);
       setTimeout(() => this.hideCopyDialog(), 1200);
@@ -105,13 +108,14 @@ export class ColorPicker extends LitElement {
     this.dlg.close();
     this.copied = null;
   }
+
   render() {
 
     const hslChannels = this.isHsl ? ['h', 's', 'l'] : ['h', 's', 'v'];
     const hsvClass = { button: true, active: !this.isHsl, l: true };
     const hslClass = { button: true, active: this.isHsl, r: true };
-    let swatchBg = {backgroundColor: this.color};
-    let hideCopied = this.copied ? {textAlign: 'center', display: 'block'} : {display: 'none'};
+    let swatchBg = { backgroundColor: this.color };
+    let hideCopied = this.copied ? { textAlign: 'center', display: 'block' } : { display: 'none' };
     return html`
       <div class='outer'>
         <hue-bar
@@ -121,35 +125,37 @@ export class ColorPicker extends LitElement {
           <div class='col w-30'>
             ${['r', 'g', 'b', 'a'].map(c => html`
               <color-input-channel
-                group="rgb" channel="${c}" isHsl="${this.isHsl}"
-                .color="${this.color}" @color-update="${this.updateColor}" />
-            `)}<div class='hex'>
-              <dialog @blur=${() => this.hideCopyDialog()} tabindex='0'>
+                group='rgb' channel='${c}' isHsl='${this.isHsl}'
+                .color='${this.color}' @color-update='${this.updateColor}' />
+            `)}
+            <div class='hex'>
+              <dialog @blur='${() => this.hideCopyDialog()}' tabindex='0'>
                 <sub class='copied' style='${styleMap(hideCopied)}'>copied <em>${this.copied}</em></sub>
                 ${this.copied ? html`` : html`
-                <a class='copy-item' @click=${(e) => this.clipboard('hex', e)}>
-                  <input class='form-control' disabled='disabled' value='${this.color.hex}'>
-                  <button title='Copy HEX String' class='button' tabindex='0'>${copy}</button>
-                </a>
-                <a class='copy-item' @click=${(e) => this.clipboard('css', e)}>
-                  <input class='form-control' disabled='disabled' value='${this.color.css}'>
-                  <button title='Copy RGB String' class='button' tabindex='0'>${copy}</button>
-                </a>
-                <a class='copy-item' @click=${(e) => this.clipboard(this.color.alpha < 1 ? 'hsla' : 'hsl', e)}>
-                  <input class='form-control' disabled='disabled' value='${this.color.toString(this.color.alpha < 1 ? 'hsla' : 'hsl')}'>
-                  <button title='Copy HSL String' class='button' tabindex='0'>${copy}</button>
-                </a>
+                  <a class='copy-item' @click=${(e) => this.clipboard('hex', e)}>
+                    <input class='form-control' disabled='disabled' value='${this.color.hex}'>
+                    <button title='Copy HEX String' class='button' tabindex='0'>${copy}</button>
+                  </a>
+                  <a class='copy-item' @click=${(e) => this.clipboard('css', e)}>
+                    <input class='form-control' disabled='disabled' value='${this.color.css}'>
+                    <button title='Copy RGB String' class='button' tabindex='0'>${copy}</button>
+                  </a>
+                  <a class='copy-item' @click=${(e) => this.clipboard(this.color.alpha < 1 ? 'hsla' : 'hsl', e)}>
+                    <input class='form-control' disabled='disabled'
+                           value='${this.color.toString(this.color.alpha < 1 ? 'hsla' : 'hsl')}'>
+                    <button title='Copy HSL String' class='button' tabindex='0'>${copy}</button>
+                  </a>
                 `}
 
               </dialog>
               <label>#</label>
               <input title='Hexadecimal value (editable - accepts any valid color string)'
-                @input='${this.setColor}' class='form-control' id='hex' placeholder='Set color'
+                     @input='${this.setColor}' class='form-control' id='hex' placeholder='Set color'
                      .value='${this.hex}' /><a title='Show copy to clipboard menu'
-                @click=${this.showCopyDialog} class='button copy'>
-                ${copy}
-                <span>&#11205;</span>
-              </a>
+                                               @click='${this.showCopyDialog}' class='button copy'>
+              ${copy}
+              <span>&#11205;</span>
+            </a>
 
             </div>
           </div>
@@ -161,11 +167,11 @@ export class ColorPicker extends LitElement {
             `)}
             <div class='hsl-mode'>
               <a title='Use hue / saturation / value (brightness) mode'
-                class=${classMap(hsvClass)}
-                @click=${() => this.setHsl(false)}>HSV</a><a
+                 class='${classMap(hsvClass)}'
+                 @click='${() => this.setHsl(false)}'>HSV</a><a
               title='Use hue / saturation / luminosity mode'
-              class=${classMap(hslClass)}
-              @click=${() => this.setHsl(true)}>HSL</a>
+              class='${classMap(hslClass)}'
+              @click='${() => this.setHsl(true)}'>HSL</a>
             </div>
           </div>
           <div class='w-40'>
@@ -173,9 +179,9 @@ export class ColorPicker extends LitElement {
               size='${160}' .isHsl='${this.isHsl}'
               .color='${this.color}' @color-update='${this.updateColor}'></hsl-canvas>
             <div class='ok'>
-              <a class='button'  @click=${this.okColor}>OK
+              <a class='button' @click='${this.okColor}'>OK
                 <span class='swatch'>
-                  <span style="${styleMap(swatchBg)}"></span>
+                  <span style='${styleMap(swatchBg)}'></span>
                   <span class='checky'></span>
                 </span>
               </a>
@@ -185,4 +191,5 @@ export class ColorPicker extends LitElement {
       </div>`;
   }
 }
+
 window.customElements.define('color-picker', ColorPicker);

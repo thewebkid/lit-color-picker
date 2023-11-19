@@ -1,6 +1,6 @@
 import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
-import { Color } from 'modern-color';
+import { Color } from './Color.js';
 import { colorEvent } from './lib.js';
 
 export class HSLCanvas extends LitElement {
