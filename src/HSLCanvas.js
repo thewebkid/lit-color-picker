@@ -2,7 +2,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
 import { Color } from 'modern-color';
 import { colorEvent } from './lib.js';
-import {LitMovable} from 'lit-movable';
 
 export class HSLCanvas extends LitElement {
   static properties = {
@@ -38,8 +37,6 @@ export class HSLCanvas extends LitElement {
     }
   `;
 
-
-
   constructor() {
     super();
     this.isHsl = true;
@@ -68,7 +65,7 @@ export class HSLCanvas extends LitElement {
     let w = (size - y) / size;
     w = Math.round(w * 100);
     let sat = Math.round((x / size) * 100);
-    let hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']:w };
+    let hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']: w };
 
     let c = isHsl ? Color.fromHsl(hsx)
       : Color.fromHsv(hsx);
@@ -124,6 +121,8 @@ export class HSLCanvas extends LitElement {
 
   firstUpdated(props) {
     let canvas = this.renderRoot.querySelector('canvas');
+    let me =  this.renderRoot.querySelector('lit-movable');
+    console.log({ me })
     this.ctx = canvas.getContext('2d');
     this.paintHSL();
   }
@@ -139,8 +138,8 @@ export class HSLCanvas extends LitElement {
       <div class='outer' @click='${this.pickCoord}' style='${styleMap(hw)}'>
         <canvas height='100' width='100'></canvas>
         <lit-movable
-          eventsOnly='${true}' boundsX='${bounds.x}' boundsY='${bounds.y}'
-          .posTop='${top}' .posLeft='${left}' .onmove='${(e) => this.circleMove(e)}'>
+          boundsX='${bounds.x}' boundsY='${bounds.y}'
+          posTop='${top}' posLeft='${left}' .onmove='${(e) => this.circleMove(e)}'>
           <div class='circle'></div>
         </lit-movable>
       </div>`;

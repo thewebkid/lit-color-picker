@@ -1,7 +1,7 @@
 // noinspection ES6MissingAwait
 
 import { html, fixture, expect } from '@open-wc/testing';
-import '../color-picker.js';
+import '../index.js';
 
 describe('ColorPicker', () => {
 

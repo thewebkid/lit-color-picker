@@ -18,10 +18,9 @@ module.exports = {
     "template-curly-spacing": "off"
   },
   plugins: ["lit-a11y"],
-
   "parserOptions": {
     parser: 'babel-eslint',
-    ecmaVersion:2023,
-    "sourceType": "module"
+    ecmaVersion: 'latest',
+    sourceType: 'module'
   }
 };

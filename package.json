@@ -1,15 +1,19 @@
 {
   "name": "color-picker",
   "description": "Webcomponent color-picker following open-wc recommendations",
+  "keywords": [
+    "web-component",
+    "lit",
+    "color-picker"
+  ],
   "license": "MIT",
   "author": "Ron Gilchrist (thewebkid)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "index.js",
   "module": "index.js",
   "exports": {
-    ".": "./index.js",
-    "./color-picker.js": "./color-picker.js"
+    ".": "./index.js"
   },
   "scripts": {
     "analyze": "cem analyze --litelement",
@@ -21,8 +25,8 @@
     "test": "web-test-runner test/**/*.test.js --coverage --node-resolve --puppeteer"
   },
   "dependencies": {
-    "lit": "^3.0.2",
-    "lit-movable": "^0.1.7",
+    "lit": "^3.1.0",
+    "lit-movable": "^0.1.11",
     "modern-color": "^1.1.1"
   },
   "devDependencies": {
@@ -30,16 +34,10 @@
     "@web/test-runner": "^0.18.0",
     "@web/test-runner-puppeteer": "^0.15.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^8.53.0",
+    "eslint": "^8.54.0",
     "eslint-plugin-lit-a11y": "^1.1.0-next.1",
     "husky": "^4.3.8",
-    "lint-staged": "^10.5.4",
     "vite": "^5.0.0"
   },
-  "customElements": "custom-elements.json",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  }
+  "customElements": "custom-elements.json"
 }

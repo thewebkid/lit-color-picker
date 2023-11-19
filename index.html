@@ -1,126 +1,158 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang='en-GB'>
 <head>
-  <meta charset="utf-8">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js" integrity="sha512-UOoJElONeUNzQbbKQbjldDf9MwOHqxNz49NNJJ1d90yp+X9edsHyJoAs6O4K19CZGaIdjI5ohK+O2y5lBTW6uQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-css.min.js" integrity="sha512-mHqYW9rlMztkE8WFB6wIPNWOVtQO50GYBsBRMyA1CMk34zLJ6BrvVy3RVHoIIofugmnoNLGxkuePQ9VT2a3u8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="./assets/main.css" />
-  <link rel="stylesheet" href="./assets/prism-dracula.css" />
-  <script type="module">
-    import '/color-picker.js';
+  <meta charset='utf-8'>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js'
+          integrity='sha512-UOoJElONeUNzQbbKQbjldDf9MwOHqxNz49NNJJ1d90yp+X9edsHyJoAs6O4K19CZGaIdjI5ohK+O2y5lBTW6uQ=='
+          crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-css.min.js'
+          integrity='sha512-mHqYW9rlMztkE8WFB6wIPNWOVtQO50GYBsBRMyA1CMk34zLJ6BrvVy3RVHoIIofugmnoNLGxkuePQ9VT2a3u8w=='
+          crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+  <link rel='stylesheet' href='./assets/main.css' />
+  <link rel='stylesheet' href='./assets/prism-dracula.css' />
+  <script type='module'>
+    import '/index.js';
+
     const rules = {
       '--bg-color': `#1E293B`,
-      '--label-color': `#cccccc`,
+      '--label-color': `#CCCCCC`,
       '--form-border-color': `#495057`,
-      '--input-active-border-color': `#86b7fe`,
+      '--input-active-border-color': `#86b7FE`,
       '--input-bg': `#020617`,
       '--input-active-bg': `#4682B4`,
-      '--input-color': `#ccc`,
-      '--input-active-color': `#333`,
+      '--input-color': `#CCCCCC`,
+      '--input-active-color': `#333333`,
       '--button-active-bg': `#0C5B9D`,
-      '--button-active-color': `#ffffff`
+      '--button-active-color': `#FFFFFF`
     };
     const staticRules = {
-      '--font-fam':'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue"',
-      '--input-active-box-shadow':`0 2px 5px #cccccc`,
-      '--outer-box-shadow':'0 4px 12px #111111'
-    }
-    let cp,button;
-    const getMatchedCSSRules = (el, css = el.ownerDocument.styleSheets) =>
-      [].concat(...[...css].map(s => [...s.cssRules||[]])) /* 1 */
-        .filter(r => el.matches(r.selectorText));            /* 2 */
-    window.addEventListener('load', ()=>{
+      '--font-fam': 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue"',
+      '--input-active-box-shadow': `0 2px 5px #CCCCCC`,
+      '--outer-box-shadow': '0 4px 12px #111111'
+    };
+    let cp, button;
 
+    window.addEventListener('load', () => {
       button = document.querySelector('input[type=color]');
       cp = document.querySelector('color-picker');
-      //cp.style.display = 'none';
       button.value = cp.color.hex;
-      console.log({ cp })
+      console.log({ cp });
       cp.addEventListener('colorchanged', (event) => {
         const { color } = event.detail;
-
         const cssVar = document.querySelector('select').value;
-        cp.shadowRoot.firstElementChild.style.setProperty(cssVar, color.css);
-        const rules = getMatchedCSSRules(cp);
-        console.log({ colorchanged: cp, rules, rgb: color.css,cssVar });
-        button.value = color.hex;
-        updateTheme();
+        if (rules[cssVar]) {
+          cp.shadowRoot.firstElementChild.style.setProperty(cssVar, color.css);
+          button.value = color.hex;
+          updateTheme();
+        }
       });
       cp.addEventListener('colorpicked', (event) => {
         const { color } = event.detail;
         button.value = color.hex;
         cp.style.display = 'none';
       });
-      button.addEventListener('click', (e)=>{
+      button.addEventListener('click', (e) => {
         e.stopImmediatePropagation();
         e.preventDefault();
         cp.style.display = 'block';
       });
 
-      const updateTheme = ()=>{
+      const updateTheme = () => {
         const cssVar = document.querySelector('select').value;
         let c = cp.color.hex;
-        rules[cssVar]= c;
+        rules[cssVar] = c;
         cp.shadowRoot.firstElementChild.style.setProperty(cssVar, c);
         button.value = c;
-        const cssOutput = Object.entries({ ...rules, ...staticRules }).map(([rule,color])=>{
-          return `  ${rule}: ${color}`
+        const cssOutput = Object.entries({ ...rules, ...staticRules }).map(([rule, color]) => {
+          return `  ${rule}: ${color}`;
         }).join(';\n');
-        document.querySelector('code').innerHTML = `
+        const codeEl = document.querySelector('code');
+        codeEl.innerHTML = `
 color-picker{
 ${cssOutput}
 }`;
         Prism.highlightAll();
-      }
+        computeSwatches();
+      };
 
-      document.querySelector('select').addEventListener('change',() => {
+      const computeSwatches = () => {
+        const codeEl = document.querySelector('code');
+        const vars = Array.from(codeEl.querySelectorAll('span.token.property'));
+        vars.forEach(el => {
+          const c = rules[el.innerText.trim()];
+          if (c && c.startsWith('#')) {
+
+            el.style.setProperty('--swatch', c);
+            el.classList.add('swatch');
+          }
+        });
+        Array.from(document.querySelectorAll('.swatch')).forEach(e => {
+          e.addEventListener('click', () => {
+
+            let cssVar = e.innerText.trim();
+            dropdown.value = cssVar;
+            let c = rules[cssVar];
+            cp.color = c;
+            button.value = c;
+            updateTheme();
+
+          });
+        });
+      };
+      const dropdown = document.querySelector('select');
+      dropdown.addEventListener('change', () => {
         const cssVar = document.querySelector('select').value;
         let c = rules[cssVar];
         cp.color = c;
         button.value = c;
-        updateTheme()
+        updateTheme();
       });
+      setTimeout(() => {// Prism first. Put at end of event loop
+        computeSwatches();
+
+      }, 0);
+
     });
 
   </script>
 
 </head>
 <body>
-  <label>
-    Use color-picker to theme your color-picker
-    <select>
-      <option selected>none</option>
-      <option>--bg-color</option>
-      <option>--label-color</option>
-      <option>--form-border-color</option>
-      <option>--input-active-border-color</option>
-      <option>--input-bg</option>
-      <option>--input-active-bg</option>
-      <option>--input-color</option>
-      <option>--input-active-color</option>
-      <option>--button-active-bg</option>
-      <option>--button-active-color</option>
+<label>
+  Use color-picker to theme your color-picker
+  <select>
+    <option selected>none</option>
+    <option>--bg-color</option>
+    <option>--label-color</option>
+    <option>--form-border-color</option>
+    <option>--input-active-border-color</option>
+    <option>--input-bg</option>
+    <option>--input-active-bg</option>
+    <option>--input-color</option>
+    <option>--input-active-color</option>
+    <option>--button-active-bg</option>
+    <option>--button-active-color</option>
 
-    </select>
-    <input type='color' value='salmon'/>
-  </label>
-  <color-picker value='rgba(250 128 114 / 0.65)' id='cp'></color-picker>
-  <h3 style='margin:30px 0 0'>Theme (CSS Vars):</h3>
+  </select>
+  <input type='color' value='#FA8072' />
+</label>
+<color-picker value='rgba(250 128 114 / 0.65)' id='cp'></color-picker>
+<h3 style='margin:30px 0 0'>Theme (CSS Vars):</h3>
 
 <code class='language-css' id='code'>
 color-picker {
   --bg-color: #1E293B;
   --label-color: #CCCCCC;
   --form-border-color: #495057;
-  --input-active-border-color: #86b7fe;
+  --input-active-border-color: #86b7FE;
   --input-bg: #020617;
   --input-active-bg: #4682B4;
-  --input-color: #ccc;
-  --input-active-color: #333;
+  --input-color: #CCCCCC;
+  --input-active-color: #333333;
   --button-active-bg: #0C5B9D;
-  --button-active-color: #ffffff;
+  --button-active-color: #FFFFFF;
   --font-fam: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue";
-  --input-active-box-shadow: 0 2px 5px #cccccc;
+  --input-active-box-shadow: 0 2px 5px #CCCCCC;
   --outer-box-shadow: 0 4px 12px #111111
 }
 </code>

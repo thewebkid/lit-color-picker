@@ -6,6 +6,17 @@ import { classMap } from 'lit/directives/class-map.js';
 import { inputChannelRules } from './css.js';
 import { colorEvent } from './lib.js';
 
+const labelDictionary = {
+  r: 'R (red) channel',
+  g: 'G (green) channel',
+  b: 'B (blue) channel',
+  h: 'H (hue) channel',
+  s: 'S (saturation) channel',
+  v: 'V (value / brightness) channel',
+  l: 'L (luminosity) channel',
+  a: 'A (alpha / opacity) channel'
+};
+
 export class ColorInputChannel extends LitElement {
   static properties = {
     group: { type: String },
@@ -118,8 +129,8 @@ export class ColorInputChannel extends LitElement {
   render() {
     return html`
       <div class='${classMap({ active: this.active })}'>
-        <label for=channel_${this.ch}>${this.channel.toUpperCase()}</label>
-        <input id=channel_${this.ch}
+        <label for=channel_${this.ch} >${this.channel.toUpperCase()}</label>
+        <input id=channel_${this.ch} title='${labelDictionary[this.channel]}'
           class='form-control' .value='${Math.round(this.v)}'
           type='number' min='0' max='${this.max}'
           @input='${this.valueChange}'
