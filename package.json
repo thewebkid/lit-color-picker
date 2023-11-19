@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "lit": "^3.0.2",
-    "modern-color": "^1.1.1",
-    "lit-movable": "^0.1.7"
+    "lit-movable": "^0.1.7",
+    "modern-color": "^1.1.1"
   },
   "devDependencies": {
     "@open-wc/testing": "^4.0.0",
