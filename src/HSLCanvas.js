@@ -121,8 +121,6 @@ export class HSLCanvas extends LitElement {
 
   firstUpdated(props) {
     let canvas = this.renderRoot.querySelector('canvas');
-    let me =  this.renderRoot.querySelector('lit-movable');
-    console.log({ me })
     this.ctx = canvas.getContext('2d');
     this.paintHSL();
   }

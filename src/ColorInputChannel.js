@@ -130,7 +130,7 @@ export class ColorInputChannel extends LitElement {
     return html`
       <div class='${classMap({ active: this.active })}'>
         <label for=channel_${this.ch} >${this.channel.toUpperCase()}</label>
-        <input id=channel_${this.ch} title='${labelDictionary[this.channel]}'
+        <input id=channel_${this.ch} aria-label='${labelDictionary[this.channel]}'
           class='form-control' .value='${Math.round(this.v)}'
           type='number' min='0' max='${this.max}'
           @input='${this.valueChange}'

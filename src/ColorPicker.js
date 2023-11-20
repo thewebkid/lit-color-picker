@@ -59,8 +59,11 @@ export class ColorPicker extends LitElement {
   setColor(e) {
     const cs = this.renderRoot.querySelector('input#hex').value;
     const c = Color.parse(cs);
+
     if (c) {
       this.color = c;
+    }else{
+      console.log(`ignored unparsable input: ${cs}`);
     }
   }
 
@@ -91,7 +94,7 @@ export class ColorPicker extends LitElement {
   }
 
   clipboard(f) {
-    console.log(f);
+
     let s = this.color.toString(f);
     navigator.clipboard.writeText(s);
     this.hideCopyDialog(s);
@@ -132,15 +135,16 @@ export class ColorPicker extends LitElement {
               <dialog @blur='${() => this.hideCopyDialog()}' tabindex='0'>
                 <sub class='copied' style='${styleMap(hideCopied)}'>copied <em>${this.copied}</em></sub>
                 ${this.copied ? html`` : html`
-                  <a class='copy-item' @click=${(e) => this.clipboard('hex', e)}>
+                  <a class='copy-item' @click=${(e) => this.clipboard('hex', e)} id='copyHex'>
                     <input class='form-control' disabled='disabled' value='${this.color.hex}'>
                     <button title='Copy HEX String' class='button' tabindex='0'>${copy}</button>
                   </a>
-                  <a class='copy-item' @click=${(e) => this.clipboard('css', e)}>
+                  <a class='copy-item' @click=${(e) => this.clipboard('css', e)} id='copyRgb'>
                     <input class='form-control' disabled='disabled' value='${this.color.css}'>
                     <button title='Copy RGB String' class='button' tabindex='0'>${copy}</button>
                   </a>
-                  <a class='copy-item' @click=${(e) => this.clipboard(this.color.alpha < 1 ? 'hsla' : 'hsl', e)}>
+                  <a class='copy-item'  id='copyHsl'
+                     @click=${(e) => this.clipboard(this.color.alpha < 1 ? 'hsla' : 'hsl', e)}>
                     <input class='form-control' disabled='disabled'
                            value='${this.color.toString(this.color.alpha < 1 ? 'hsla' : 'hsl')}'>
                     <button title='Copy HSL String' class='button' tabindex='0'>${copy}</button>
@@ -148,10 +152,10 @@ export class ColorPicker extends LitElement {
                 `}
 
               </dialog>
-              <label>#</label>
-              <input title='Hexadecimal value (editable - accepts any valid color string)'
+              <label for='hex'>#</label>
+              <input aria-label='Hexadecimal value (editable - accepts any valid color string)'
                      @input='${this.setColor}' class='form-control' id='hex' placeholder='Set color'
-                     .value='${this.hex}' /><a title='Show copy to clipboard menu'
+                     value='${this.hex}' /><a title='Show copy to clipboard menu'
                                                @click='${this.showCopyDialog}' class='button copy'>
               ${copy}
               <span>&#11205;</span>

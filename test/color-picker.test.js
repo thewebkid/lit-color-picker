@@ -1,17 +1,26 @@
-// noinspection ES6MissingAwait
+// noinspection ES6MissingAwait,JSUnresolvedReference
 
 import { html, fixture, expect } from '@open-wc/testing';
 import '../index.js';
-
+import { sendKeys, sendMouse } from '@web/test-runner-commands';
+import { clickCenter } from './test.utilities.js';
+//import {sendMouse} from '@web/test-runner-puppeteer';
 describe('ColorPicker', () => {
 
-  it('passes the a11y audit', async () => {
+  it('root and all inputs pass the a11y audit', async () => {
 
-    const el = await fixture(html`
+    const cp = await fixture(html`
       <color-picker></color-picker>
     `);
+    const inputs = Array.from(await cp.shadowRoot.querySelectorAll('color-input-channel'))
+      .map(e => e.shadowRoot.querySelector('input'));
+    inputs.push(cp.shadowRoot.querySelector('input#hex'));
 
-    await expect(el).shadowDom.to.be.accessible();
+    await expect(cp).shadowDom.to.be.accessible();
+    // todo: understand the Axe is already running error
+    inputs.forEach(async (input) => {
+      await expect(input).to.be.accessible();
+    });
 
   });
   it('should accept an rgba string value and expose proper channel data', async () => {
@@ -37,16 +46,16 @@ describe('ColorPicker', () => {
     expect(hsv.v).to.be.eq(98);
     //done();
   });
+
   it('should have 7 child channel input elements in correct order', async () => {
     const cp = await fixture(html`
       <color-picker value='rgba(250 128 114 / 0.65)'></color-picker>
     `);
     const expectedChannels = ['r', 'g', 'b', 'a', 'h', 's', 'l'];
     const channels = Array.from(cp.shadowRoot.querySelectorAll('color-input-channel'));
-    channels.forEach((c, i) => {
-      expect(c.getAttribute('channel')).to.be.eq(expectedChannels[i]);
+    channels.forEach(async (c, i) => {
+      await expect(c.getAttribute('channel')).to.be.eq(expectedChannels[i]);
     });
-    //done();
   });
   it('should render a clickable hue slider', async () => {
     const cp = await fixture(html`
@@ -56,19 +65,20 @@ describe('ColorPicker', () => {
     const hueBar = cp.shadowRoot.querySelector('hue-bar');
     const {width} = hueBar.getBoundingClientRect();
 
-    expect(hueBar).to.be.accessible();
+    await expect(hueBar).to.be.accessible();
     const computedHue = (offsetX) => {
       let ratio = 360 / width;
       return Math.max(0, Math.min(359, Math.round(offsetX * ratio)));
     };
-
+    // spoof mouse events
     for (let offsetX = 1; offsetX < width; offsetX += 7) {
       hueBar.selectHue({ offsetX });
       let actualHue = cp.color.hsl.h;
       let expectedHue = computedHue(offsetX);
-      expect(actualHue).to.be.eq(expectedHue);
+      await expect(actualHue).to.be.eq(expectedHue);
     }
   });
+
 
   it('should update rgb channels when hsl mutations occur', async () => {
     const cp = await fixture(html`
@@ -78,18 +88,58 @@ describe('ColorPicker', () => {
 
     //check initial root channel values
     const inputEl = c => c.shadowRoot.querySelector('input');
-    expect(cp.color.r).to.be.eq(Number(inputEl(r).value));
-    expect(cp.color.g).to.be.eq(Number(inputEl(g).value));
-    expect(cp.color.b).to.be.eq(Number(inputEl(b).value));
+    await expect(cp.color.r).to.be.eq(Number(inputEl(r).value));
+    await expect(cp.color.g).to.be.eq(Number(inputEl(g).value));
+    await expect(cp.color.b).to.be.eq(Number(inputEl(b).value));
 
     //180deg hue change
     inputEl(h).value = 180;
     h.valueChange();
 
     //check for appropriate new rgb vals
-    expect(cp.color.r).to.be.eq(0);
-    expect(cp.color.g).to.be.eq(255);
-    expect(cp.color.b).to.be.eq(255);
+    await expect(cp.color.r).to.be.eq(0);
+    await expect(cp.color.g).to.be.eq(255);
+    await expect(cp.color.b).to.be.eq(255);
 
+  });
+  it('should parse valid color strings pasted into the hex textbox', async () => {
+    const cp = await fixture(html`
+      <color-picker value='red'></color-picker>
+    `);
+    const hex = cp.shadowRoot.querySelector('#hex');
+    clickCenter(hex);
+    hex.focus();
+    // select all manually
+    await sendKeys({
+      down: 'Control'
+    });
+    await sendKeys({
+      press: 'KeyA'
+    });
+    await sendKeys({
+      up: 'Control'
+    });
+    // type a namedColor
+    await sendKeys({ type: 'salmon' });
+    //fire blur
+    await sendMouse({type: 'click', position: [0, 0]});
+    await expect(cp.color.hex).to.be.eq('#FA8072');
+  });
+  it('should toggle copy dialog with correct values when copy button pressed', async () => {
+    const cp = await fixture(html`
+      <color-picker value='green'></color-picker>
+    `);
+    let dialogActions = () => ['Hex', 'Rgb', 'Hsl'].map(s => cp.shadowRoot.getElementById(`copy${s}`));
+    let expectedValues = ['#008000', 'rgba(0,128,0,1)', 'hsl(120, 100%, 25%)'];
+    const visibleAndValid = () => dialogActions().every((a, i) => {
+      let v = a.querySelector('input').value;
+      const valid = v === expectedValues[i];
+      return a.offsetParent !== null && valid;
+    });
+    const hidden = () => dialogActions().every(a => a.offsetParent === null);
+    await expect(hidden()).to.be.eq(true);
+    const copyButton = cp.shadowRoot.querySelector('.button.copy');
+    await clickCenter(copyButton);
+    await expect(visibleAndValid()).to.be.eq(true);
   });
 });
