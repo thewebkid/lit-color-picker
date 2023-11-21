@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { Color } from './Color.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { hueGradient } from './lib.js';
+import { colorEvent, hueGradient } from './lib.js';
 
 export class HueBar extends LitElement {
   static properties = {
@@ -42,6 +42,12 @@ export class HueBar extends LitElement {
 
   firstUpdated() {
     let me = this.renderRoot.querySelector('lit-movable');
+    me.onmovestart = () => {
+      colorEvent(this.renderRoot, { sliding: true }, 'sliding-hue');
+    };
+    me.onmoveend = () => {
+      colorEvent(this.renderRoot, { sliding: false }, 'sliding-hue');
+    };
     me.onmove = ({ posLeft }) => this.selectHue({offsetX: posLeft});
     this.sliderStyle = this.sliderCss(this.hue);
   }
@@ -58,7 +64,14 @@ export class HueBar extends LitElement {
       if (this.color.hsx){
         h = this.color.hsx.h;
       }
-      let color = Color.parse({ h, s:100, l:50 });
+      if (h === undefined) {
+        if (this.sliderBounds.posLeft > 5 && this.sliderBounds.posLeft < 355) {
+          return { backgroundColor: 'transparent' };//transparent ok when sliding
+        }
+        h = this.color.hsl.h;
+      }
+      let color = Color.parse({ h, s: 100, l: 50 });
+
       return  { backgroundColor: color.css };
     };
   }
@@ -78,7 +91,7 @@ export class HueBar extends LitElement {
   selectHue(e) {
     let r = 360 / this.width;
     let l = e.offsetX;
-    let h = Math.max(0,Math.min(359,Math.round(l * r)));
+    let h = Math.max(0, Math.min(359, Math.round(l * r)));
     let target = this.renderRoot.querySelector('a');
     let event = new CustomEvent('hue-update', {
       bubbles: true,

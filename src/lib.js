@@ -1,14 +1,15 @@
 import { Color } from './Color.js';
 import {html} from 'lit';
 
-export const colorEvent = (target, color, name='color-update') => {
+export const colorEvent = (target, color, name = 'color-update') => {
+  const detail = name.includes('color') ? {color} : color;
   let event = new CustomEvent(name, {
     bubbles: true,
     composed: true,
-    detail: { color }
+    detail
   });
   target.dispatchEvent(event);
-}
+};
 export const hueGradient = (gran = 3, hsx) => {
   //todo: update to take optional hsx(v/l) vals and compose
   let h = 0;
@@ -28,17 +29,17 @@ export const hueGradient = (gran = 3, hsx) => {
   }
   const stops = [];
   let color, pos;
-  const cs = (color,pos) => `${color.css} ${(pos * 100).toFixed(1)}%`;
+  const cs = (color, pos) => `${color.css} ${(pos * 100).toFixed(1)}%`;
   while (h < 360) {
-    color = Color.parse(isHsv ? {h,s,v} : {h, s, l});
+    color = Color.parse(isHsv ? {h, s, v} : {h, s, l});
     pos = h / 360;
-    stops.push(cs(color,pos));
+    stops.push(cs(color, pos));
     h += gran;
   }
   h = 359;
-  color = Color.parse(isHsv ? {h,s,v} : {h, s, l});
+  color = Color.parse(isHsv ? {h, s, v} : {h, s, l});
   pos = 1;
-  stops.push(cs(color,pos));
+  stops.push(cs(color, pos));
   return stops.join(', ');
 };
 

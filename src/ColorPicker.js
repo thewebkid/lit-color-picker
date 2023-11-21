@@ -19,7 +19,8 @@ export class ColorPicker extends LitElement {
     hex: { type: String, state: true, attribute: false },
     value: { type: String },
     isHsl: { type: Boolean, state: true, attribute: false },
-    copied: { type: String }
+    copied: { type: String },
+    debounceMode:{type: Boolean}
   };
 
   static styles = root;
@@ -33,6 +34,7 @@ export class ColorPicker extends LitElement {
   }
 
   firstUpdated(props) {
+    this.debounceMode = false;
     if (props.has('value')) {
       this.color = Color.parse(this.value);
     }
@@ -111,7 +113,9 @@ export class ColorPicker extends LitElement {
     this.dlg.close();
     this.copied = null;
   }
-
+  setSliding({ detail }){
+    this.debounceMode = detail.sliding;
+  }
   render() {
 
     const hslChannels = this.isHsl ? ['h', 's', 'l'] : ['h', 's', 'v'];
@@ -119,9 +123,11 @@ export class ColorPicker extends LitElement {
     const hslClass = { button: true, active: this.isHsl, r: true };
     let swatchBg = { backgroundColor: this.color };
     let hideCopied = this.copied ? { textAlign: 'center', display: 'block' } : { display: 'none' };
+    const debounceMode = this.debounceMode;
     return html`
       <div class='outer'>
         <hue-bar
+          @sliding-hue='${this.setSliding}'
           hue='${this.color.hsx ? this.color.hsx.h : this.color.hsl.h}'
           @hue-update='${this.setHue}' .color='${this.color}'></hue-bar>
         <div class='d-flex'>
@@ -179,7 +185,7 @@ export class ColorPicker extends LitElement {
             </div>
           </div>
           <div class='w-40'>
-            <hsl-canvas
+            <hsl-canvas .debounceMode='${debounceMode}'
               size='${160}' .isHsl='${this.isHsl}'
               .color='${this.color}' @color-update='${this.updateColor}'></hsl-canvas>
             <div class='ok'>
