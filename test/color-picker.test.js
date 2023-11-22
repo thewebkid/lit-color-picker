@@ -23,11 +23,36 @@ describe('ColorPicker', () => {
     });
 
   });
+  it('should have 7 buttons that pass the a11y audit', async () => {
+    const cp = await fixture(html`
+      <color-picker value=blue></color-picker>
+    `);
+    const buttons = Array.from(await cp.shadowRoot.querySelectorAll('.button'));
+    await expect(buttons.length).to.be.eq(7);
+    //2 mode toggle, 1 clipboard dialog toggle, 3 clipboard format, 1 ok
+    buttons.forEach(async (btn) => {
+      await expect(btn).to.be.accessible();
+    });
+  });
+  it('should change to hsv when clicked', async () => {
+    const cp = await fixture(html`
+      <color-picker value=yellow></color-picker>
+    `);
+    const hsvButton = Array.from(await cp.shadowRoot.querySelectorAll('.hsl-mode .button'))[0];
+    //test hsl mode before user click
+    await expect(cp.isHsl).to.be.eq(true);
+    await expect(hsvButton.classList.contains('active')).to.be.eq(false);
+    await clickCenter(hsvButton);
+    //test hsl mode after user click
+    await expect(cp.isHsl).to.be.eq(false);
+    await expect(hsvButton.classList.contains('active')).to.be.eq(true);
+  });
+
   it('should accept an rgba string value and expose proper channel data', async () => {
     const cp = await fixture(html`
       <color-picker value='rgba(250 128 114 / 0.65)'></color-picker>
     `);
-    // grab parsed color from value attrib
+    // grab parsed color from color prop
     const {r, g, b, a, hsl, hsv} = cp.color;
     // test rgba values
     expect(r).to.be.eq(250);
@@ -141,5 +166,27 @@ describe('ColorPicker', () => {
     const copyButton = cp.shadowRoot.querySelector('.button.copy');
     await clickCenter(copyButton);
     await expect(visibleAndValid()).to.be.eq(true);
+  });
+
+  it('should have a hsl-canvas element that responds to clicks', async () => {
+    const cp = await fixture(html`
+      <color-picker value='#532579'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await expect(hslc).shadowDom.to.be.accessible();
+    const canvas = hslc.shadowRoot.querySelector('canvas');
+    const { offsetHeight, offsetWidth } = canvas;
+    await clickCenter(canvas);
+
+    //ensure movable circle properly repositioned
+    const me = hslc.shadowRoot.querySelector('lit-movable');
+    expect(me.offsetLeft).to.be.eq(offsetWidth/2);
+    expect(me.offsetTop).to.be.eq(offsetHeight/2);
+
+    const { s,l } = cp.color.hsl;
+    // parent saturation and luminosity channels should be at 50
+    expect(s).to.be.eq(50);
+    expect(l).to.be.eq(50);
+
   });
 });
