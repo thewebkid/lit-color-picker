@@ -33,7 +33,7 @@ export class HSLCanvas extends LitElement {
       border-radius: 50%;
       box-shadow: 0 0 3px #000, inset 0 0 1px #fff;
       position: absolute;
-      margin: -7px;
+      margin: -8px;
       mix-blend-mode: difference;
     }
   `;

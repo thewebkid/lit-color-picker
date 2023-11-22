@@ -29,7 +29,6 @@ export class HueBar extends LitElement {
       margin-left: -4px;
       box-shadow: 0 0 3px #111, inset 0 0 2px white;
     }
-
   `;
 
   constructor() {
@@ -65,9 +64,6 @@ export class HueBar extends LitElement {
         h = this.color.hsx.h;
       }
       if (h === undefined) {
-        if (this.sliderBounds.posLeft > 5 && this.sliderBounds.posLeft < 355) {
-          return { backgroundColor: 'transparent' };//transparent ok when sliding
-        }
         h = this.color.hsl.h;
       }
       let color = Color.parse({ h, s: 100, l: 50 });

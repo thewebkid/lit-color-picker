@@ -45,7 +45,11 @@ export class ColorInputChannel extends LitElement {
   }
 
   valueChange = (e, val = null) => {
-    this.c[this.channel] = val ?? Number(this.renderRoot.querySelector('input').value);
+    val = val ?? Number(this.renderRoot.querySelector('input').value);
+    if (this.channel === 'a'){
+      val /= 100;
+    }
+    this.c[this.channel] = val;
     let c = Color.parse(this.c);
     if (this.group !== 'rgb'){
       c.hsx = this.c;
@@ -88,7 +92,7 @@ export class ColorInputChannel extends LitElement {
     let minC, maxC;
     if (g !== 'rgb' || ch === 'a') {
       if (ch === 'h') {
-        max = this.max = 360;
+        max = this.max = 359;
         this.previewGradient = {
           '--preview': `linear-gradient(90deg, ${hueGradient(24, c)})`,
           '--pct': `${100 * (c.h / max)}%`
@@ -127,20 +131,21 @@ export class ColorInputChannel extends LitElement {
   }
 
   render() {
+    const chex = this.channel === 'a' ? html`<div class='transparent-checks'></div>` : null;
+    const max = this.channel === 'a' ? 100 : this.max;
     return html`
       <div class='${classMap({ active: this.active })}'>
         <label for=channel_${this.ch} >${this.channel.toUpperCase()}</label>
         <input id=channel_${this.ch} aria-label='${labelDictionary[this.channel]}'
           class='form-control' .value='${Math.round(this.v)}'
-          type='number' min='0' max='${this.max}'
+          type='number' min='0' max='${max}'
           @input='${this.valueChange}'
           @focus='${() => this.setActive(true)}'
           @blur='${() => this.setActive(false)}'
         />
         <div class='preview-bar' style='${styleMap(this.previewGradient)}' @mousedown='${this.clickPreview}'>
           <div class='pct'></div>
-          <!--Only becomes visible for the alpha channel-->
-          <div class='transparent-checks'></div>
+          ${chex}
         </div>
       </div>`;
   }

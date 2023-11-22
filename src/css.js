@@ -172,7 +172,7 @@ export const root = css`
       display: inline-block;
     }
     :host .button.copy{
-      padding:7px 7px 5px 4px;
+      padding:8px 6px 5px 5px;
       position:relative;
       border-left:0;
       border-bottom-right-radius: 3px;
@@ -184,13 +184,14 @@ export const root = css`
       vertical-align: middle;
     }
     :host .button.copy svg{
-      height:15px;
+      height:16px;
       width:15px;
+      margin-right:-2px;
     }
   :host .button.copy span{
     font-size: 10px;
     position:relative;
-    top:-2px;
+    top:-3px;
   }
     :host a.button.l{
       border-top-left-radius: 3px;
@@ -199,6 +200,7 @@ export const root = css`
     :host a.button.r{
       border-top-right-radius: 3px;
       border-bottom-right-radius: 3px;
+      border-left:none;
     }
     :host a.button.active{
       color: #eee;
@@ -259,10 +261,10 @@ export const inputChannelRules = css`
 
   :host .preview-bar {
     height: 4px;
-    width: 85px;
+    width: 85.5px;
     position: absolute;
     bottom: 0px;
-    right: 18px;
+    right: 17.5px;
     --pct: 0;
     pointer-events: none;
     z-index: 2;
@@ -272,6 +274,10 @@ export const inputChannelRules = css`
     position: absolute;
     content: '';
     background-image: var(--preview);
+    background-color: transparent;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    box-shadow: inset 0 -1px 1px var(--form-border-color);
     height: 100%;
     width: 100%;
   }
@@ -286,8 +292,12 @@ export const inputChannelRules = css`
     pointer-events: all;
     z-index: 2;
     cursor: pointer;
-  }
 
+  }
+  :host > div.active .preview-bar:after {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
   :host .preview-bar .pct {
     bottom: -3px;
     margin-top: -.75px;
@@ -311,8 +321,20 @@ export const inputChannelRules = css`
     background-color: #fff;
     clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
+  :host .active .preview-bar .pct:before{
 
+    width:7px;
+    height:11px;
+    left:-3.5px;
+    top:-1px;
+  }
   :host .transparent-checks {
     ${transparentChex}
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+  :host div.active .transparent-checks {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
   }
 `;
