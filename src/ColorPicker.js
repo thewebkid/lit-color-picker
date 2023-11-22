@@ -1,7 +1,7 @@
 // noinspection ES6UnusedImports
 
 import { css, html, LitElement } from 'lit';
-import { Color, namedColors } from './Color.js';
+import { Color, namedColors } from 'modern-color';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 // todo: understand why eslint thinks these are unused - they are dependencies
@@ -98,8 +98,10 @@ export class ColorPicker extends LitElement {
   clipboard(f) {
 
     let s = this.color.toString(f);
-    navigator.clipboard.writeText(s);
-    this.hideCopyDialog(s);
+    window.navigator.clipboard.writeText(s).then(()=>{
+      this.hideCopyDialog(s);
+    });
+
   }
 
   hideCopyDialog(copyText) {

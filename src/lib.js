@@ -1,4 +1,4 @@
-import { Color } from './Color.js';
+import { Color } from 'modern-color';
 import {html} from 'lit';
 
 export const colorEvent = (target, color, name = 'color-update') => {
