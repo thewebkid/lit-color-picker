@@ -4,7 +4,7 @@
   "keywords": [
     "web-component",
     "lit",
-    "color-picker"
+    "colorpicker","lit-element","color"
   ],
   "license": "MIT",
   "author": "Ron Gilchrist (thewebkid)",
