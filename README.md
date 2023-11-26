@@ -1,7 +1,7 @@
 # \<color-picker>  [![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <img src="https://thewebkid.com/lit-colorpicker.png?v=2" width=600>
 
-A color-picker web component (built with Lit 3). This initial version is experimental. 
+A color-picker web component (built with Lit 3). Under active development. Please open an issue if you have a bug or suggestion. 
 
 [Live Demo](http://thewebkid.com/modules/lit-colorpicker)
 
@@ -71,13 +71,19 @@ color-picker {
 
 Run the demo to use the dynamic theme picker.
 
-## Local Dev Server  `vite`
-
+## Run local
+Recommended so you can use the theme chooser. Uses vite. Will run on node 16+ - but will complain about compatibility if you are stuck on node 16 like me. Ignore these. It's fine.
 ```bash
+git clone https://github.com/thewebkid/lit-color-picker.git
+cd cd ./lit-color-picker
+npm i
 npm dev
 ```
 
-To run a local development server that serves the working example + theme-chooser located in `./index.html`
+
+## Need more help?
+I am open to work if you need a dev like me. Snatch me up. My portfolio and the link to my LinkedIn are on https://thewebkid.com :)
+
 
 
 

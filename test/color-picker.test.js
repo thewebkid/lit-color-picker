@@ -4,7 +4,7 @@ import { html, fixture, expect } from '@open-wc/testing';
 import '../index.js';
 import { sendKeys, sendMouse } from '@web/test-runner-commands';
 import { clickCenter } from './test.utilities.js';
-//import {sendMouse} from '@web/test-runner-puppeteer';
+
 describe('ColorPicker', () => {
 
   it('root and all inputs pass the a11y audit', async () => {
@@ -18,6 +18,7 @@ describe('ColorPicker', () => {
 
     await expect(cp).shadowDom.to.be.accessible();
     // todo: understand the Axe is already running error
+    // the console warnings only appear on this test. wth
     inputs.forEach(async (input) => {
       await expect(input).to.be.accessible();
     });
@@ -69,7 +70,6 @@ describe('ColorPicker', () => {
     expect(hsv.h).to.be.eq(6);
     expect(hsv.s).to.be.eq(54);
     expect(hsv.v).to.be.eq(98);
-    //done();
   });
 
   it('should have 7 child channel input elements in correct order', async () => {
@@ -180,10 +180,10 @@ describe('ColorPicker', () => {
 
     //ensure movable circle properly repositioned
     const me = hslc.shadowRoot.querySelector('lit-movable');
-    expect(me.offsetLeft).to.be.eq(offsetWidth/2);
-    expect(me.offsetTop).to.be.eq(offsetHeight/2);
+    expect(me.offsetLeft).to.be.eq(offsetWidth / 2);
+    expect(me.offsetTop).to.be.eq(offsetHeight / 2);
 
-    const { s,l } = cp.color.hsl;
+    const { s, l } = cp.color.hsl;
     // parent saturation and luminosity channels should be at 50
     expect(s).to.be.eq(50);
     expect(l).to.be.eq(50);

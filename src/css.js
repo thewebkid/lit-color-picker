@@ -174,6 +174,7 @@ export const root = css`
     :host .button.copy{
       padding:8px 6px 5px 5px;
       position:relative;
+      position:relative;
       border-left:0;
       border-bottom-right-radius: 3px;
       border-top-right-radius: 3px;
