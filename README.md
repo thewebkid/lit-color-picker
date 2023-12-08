@@ -1,9 +1,11 @@
 # \<color-picker>  [![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <img src="https://thewebkid.com/lit-colorpicker.png?v=2" width=600>
 
-A color-picker web component (built with Lit 3). Under active development. Please open an issue if you have a bug or suggestion. 
+A rich colorpicker web component. Enables deep visualization into all channels of a color.  
 
 [Live Demo](http://thewebkid.com/modules/lit-colorpicker)
+
+Since this is a [Lit 3 web component](https://lit.dev/), this will work inside any SPA framework. [React integration docs](https://lit.dev/docs/frameworks/react/). Framework-agnostic web components are the future!
 
 ## Installation
 
