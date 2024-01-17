@@ -1,1 +1,1 @@
-export { ColorPicker } from './src/ColorPicker.js';
+export { ColorPicker } from './dist/index.js';
