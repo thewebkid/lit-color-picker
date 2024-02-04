@@ -82,13 +82,6 @@ npm i
 npm dev
 ```
 
-
-## Need more help?
-I am open to work if you need a dev like me. Snatch me up. My portfolio and the link to my LinkedIn are on https://thewebkid.com :)
-
-
-
-
 ## Run Tests 
 ```bash
 npm test

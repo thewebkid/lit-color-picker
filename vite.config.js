@@ -5,7 +5,7 @@ export default defineConfig({
   build: {
     copyPublicDir: false,
     lib: {
-      entry: resolve(__dirname, ''),
+      entry: resolve(__dirname, 'build.js'),
       name: 'color-picker',
       fileName: 'index'
     }
