@@ -46,9 +46,9 @@ export class ColorInputChannel extends LitElement {
 
   valueChange = (e, val = null) => {
     val = val ?? Number(this.renderRoot.querySelector('input').value);
-    if (this.channel === 'a'){
+    /* if (this.channel === 'a'){
       val /= 100;
-    }
+    } */
     this.c[this.channel] = val;
     let c = Color.parse(this.c);
     if (this.group !== 'rgb'){
@@ -86,7 +86,8 @@ export class ColorInputChannel extends LitElement {
     const isAlpha = ch === 'a';
     this.v = c[ch];
     if (isAlpha) {
-      this.v *= 100;
+      //this.v *= 100;
+      this.v = Math.max(0, Math.min(this.v, 1));
     }
     let max = 255;
     let minC, maxC;
@@ -121,7 +122,7 @@ export class ColorInputChannel extends LitElement {
     } else {
       this.previewGradient = {
         '--preview': `linear-gradient(90deg, ${isAlpha ? minC.css : minC.hex}, ${isAlpha ? maxC.css : maxC.hex})`,
-        '--pct': `${100 * (c[this.channel] / max)}%`
+        '--pct': `${Math.min(100, Math.max((isAlpha ? 100 : 100) * (c[this.channel] / max), 0))}%`
       };
     }
   }
@@ -132,13 +133,13 @@ export class ColorInputChannel extends LitElement {
 
   render() {
     const chex = this.channel === 'a' ? html`<div class='transparent-checks'></div>` : null;
-    const max = this.channel === 'a' ? 100 : this.max;
+    const max = this.channel === 'a' ? 1 : this.max;
     return html`
       <div class='${classMap({ active: this.active })}'>
         <label for=channel_${this.ch} >${this.channel.toUpperCase()}</label>
         <input id=channel_${this.ch} aria-label='${labelDictionary[this.channel]}'
-          class='form-control' .value='${Math.round(this.v)}'
-          type='number' min='0' max='${max}'
+          class='form-control' .value='${this.channel === 'a' && this.v < 1 ? Math.min(1, this.v).toFixed(2) : Math.round(this.v)}'
+          type='number' min='0' max='${max}' .step='${this.channel === 'a' ? .01 : 1}'
           @input='${this.valueChange}'
           @focus='${() => this.setActive(true)}'
           @blur='${() => this.setActive(false)}'

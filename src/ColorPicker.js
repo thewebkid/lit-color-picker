@@ -204,4 +204,4 @@ export class ColorPicker extends LitElement {
   }
 }
 
-window.customElements.define('color-picker', ColorPicker);
+window.customElements.get('color-picker') || window.customElements.define('color-picker', ColorPicker);
