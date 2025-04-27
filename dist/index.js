@@ -285,8 +285,8 @@ z.elementStyles = [], z.shadowRootOptions = { mode: "open" }, z[J("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Q = globalThis, pt = Q.trustedTypes, Vt = pt ? pt.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, ge = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, me = "?" + S, Ye = `<${me}>`, N = document, it = () => N.createComment(""), rt = (o) => o === null || typeof o != "object" && typeof o != "function", Tt = Array.isArray, Ze = (o) => Tt(o) || typeof (o == null ? void 0 : o[Symbol.iterator]) == "function", xt = `[ 	
-\f\r]`, G = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, qt = /-->/g, Xt = />/g, M = RegExp(`>|${xt}(?:([^\\s"'>=/]+)(${xt}*=${xt}*(?:[^ 	
+const Q = globalThis, pt = Q.trustedTypes, Vt = pt ? pt.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, ge = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, me = "?" + S, Ye = `<${me}>`, N = document, it = () => N.createComment(""), rt = (o) => o === null || typeof o != "object" && typeof o != "function", Tt = Array.isArray, Ze = (o) => Tt(o) || typeof (o == null ? void 0 : o[Symbol.iterator]) == "function", xt = `[
+\f\r]`, G = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, qt = /-->/g, Xt = />/g, M = RegExp(`>|${xt}(?:([^\\s"'>=/]+)(${xt}*=${xt}*(?:[^
 \f\r"'\`<>=]|("|')|))|$)`, "g"), Wt = /'/g, Yt = /"/g, be = /^(?:script|style|textarea|title)$/i, Ge = (o) => (t, ...e) => ({ _$litType$: o, strings: t, values: e }), x = Ge(1), H = Symbol.for("lit-noChange"), g = Symbol.for("lit-nothing"), Zt = /* @__PURE__ */ new WeakMap(), B = N.createTreeWalker(N, 129);
 function $e(o, t) {
   if (!Tt(o) || !o.hasOwnProperty("raw")) throw Error("invalid template strings array");
@@ -1966,8 +1966,8 @@ I.elementStyles = [], I.shadowRootOptions = { mode: "open" }, I[tt("elementPrope
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const ft = globalThis, gt = ft.trustedTypes, ee = gt ? gt.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, Me = "$lit$", E = `lit$${(Math.random() + "").slice(9)}$`, Pe = "?" + E, ys = `<${Pe}>`, R = document, ot = () => R.createComment(""), nt = (o) => o === null || typeof o != "object" && typeof o != "function", De = Array.isArray, _s = (o) => De(o) || typeof (o == null ? void 0 : o[Symbol.iterator]) == "function", St = `[ 	
-\f\r]`, K = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, ie = />/g, U = RegExp(`>|${St}(?:([^\\s"'>=/]+)(${St}*=${St}*(?:[^ 	
+const ft = globalThis, gt = ft.trustedTypes, ee = gt ? gt.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, Me = "$lit$", E = `lit$${(Math.random() + "").slice(9)}$`, Pe = "?" + E, ys = `<${Pe}>`, R = document, ot = () => R.createComment(""), nt = (o) => o === null || typeof o != "object" && typeof o != "function", De = Array.isArray, _s = (o) => De(o) || typeof (o == null ? void 0 : o[Symbol.iterator]) == "function", St = `[
+\f\r]`, K = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, ie = />/g, U = RegExp(`>|${St}(?:([^\\s"'>=/]+)(${St}*=${St}*(?:[^
 \f\r"'\`<>=]|("|')|))|$)`, "g"), re = /'/g, oe = /"/g, Ue = /^(?:script|style|textarea|title)$/i, xs = (o) => (t, ...e) => ({ _$litType$: o, strings: t, values: e }), As = xs(1), Y = Symbol.for("lit-noChange"), m = Symbol.for("lit-nothing"), ne = /* @__PURE__ */ new WeakMap(), O = R.createTreeWalker(R, 129);
 function Be(o, t) {
   if (!Array.isArray(o) || !o.hasOwnProperty("raw"))
@@ -2469,7 +2469,7 @@ v(Oe, "properties", {
   onmoveend: { type: Object },
   onmove: { type: Object }
 });
-window.customElements.define("lit-movable", Oe);
+window.customElements.get("lit-movable") || window.customElements.define("lit-movable", Oe);
 class Ut extends k {
   constructor() {
     super();
