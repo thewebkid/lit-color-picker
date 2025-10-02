@@ -1,13 +1,12 @@
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
-  build: {
-    copyPublicDir: false,
-    lib: {
-      entry: resolve(__dirname, 'build.js'),
-      name: 'color-picker',
-      fileName: 'index'
+  plugins: [vue({
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.includes('color-picker') || tag.includes('hue-bar') || tag.includes('hsl-canvas') || tag.includes('color-input-channel')
+      }
     }
-  }
-});
+  })]
+})
