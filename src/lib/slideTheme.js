@@ -152,11 +152,18 @@ class SlideTheme {
   get headingBoxBrand() {
     return {
       fontWeight: 600,
-      color: this.scheme.slideHeading,
-      background: this.scheme.light2.darken(.9)
+      color: this.scheme.slideHeading.negate(),
+      fontSize: px(this.fontSizes.xl),
+      //background: this.scheme.slideText.darken(.9)
     };
   }
-
+  get slideRoot(){
+    return {
+      background: this.scheme.slideBg,
+      color: this.scheme.slideText,
+      fontSize: px(this.fontSizes.md),
+    }
+  }
 }
 
 class BeciseTheme extends SlideTheme {
@@ -226,14 +233,15 @@ class BeciseTheme extends SlideTheme {
   get brandBox() {
     const { primary, primary4 } = this.scheme;
     return {
-      background: `linear-gradient(90deg, ${primary} -26.08%, ${primary4} 85.04%)`
+      background: `linear-gradient(90deg, ${primary} -26.08%, ${primary4} 85.04%)`,
+      color: this.scheme.slideText.negate()
     };
   }
 
   get brandSlide() {
     return {
       ...this.fullBgBrand,
-      color: this.scheme.light1
+      color: this.scheme.slideText.negate(),
     };
   }
 }

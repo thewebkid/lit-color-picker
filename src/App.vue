@@ -12,7 +12,7 @@
               <span>...</span>
             </div>
           </template>
-          <b-dropdown-item v-for="key in allKeys" :key="key" @click="targetKey=key">
+          <b-dropdown-item v-for="key in allKeys" :key="key" @click="changeTarget(key)">
             <div class="d-flex">
               <span class="swatch mt-1 me-2" :style="{backgroundColor: scheme[key].css}"></span>
               <div>{{ key }}</div>
@@ -20,7 +20,8 @@
           </b-dropdown-item>
         </b-dropdown>
         <color-picker
-          ref="colorPicker" :value="scheme[targetKey]"
+          v-if="showPicker"
+          ref="colorPicker" :value="scheme[targetKey].hex"
           @colorchanged="onColorUpdated"
         />
 
@@ -74,7 +75,7 @@
       </BCol>
       <BCol v-if="renderColors">
         <div style="transform: scale(.75);position: relative;left:-200px;top:-200px">
-          <div class="slide">
+          <div class="slide" :style="theme.slideRoot">
             <div class="heading" :style="theme.headingBox">headingBox</div>
             <div class="d-flex w-100 slide-content">
               <div class="w-50 p-5">
@@ -104,8 +105,26 @@
 
             </div>
           </div>
-          <div class="slide" :style="theme.brandSlide"></div>
+          <div class="slide brand-slide" :style="theme.brandSlide">
+            <div class="heading" :style="theme.headingBoxBrand">Heading</div>
+          </div>
+          <div class="slide d-flex" :style="theme.slideRoot">
+            <div class="w-50 p-5" :style="theme.brandBox">
+              <div class="heading">Panel Text</div>
+            </div>
+            <div class="w-50 p-5">
+              <div class="content-box">
+                <ul>
+                  <li>Content 1</li>
+                  <li>Content 2</li>
+                  <li>Content 3</li>
+                </ul>
+
+              </div>
+            </div>
+          </div>
         </div>
+
       </BCol>
     </BRow>
   </BContainer>
@@ -121,7 +140,7 @@ export default {
   data() {
     return {
       renderColors: true,
-      showPicker: false,
+      showPicker: true,
       targetKey: 'primary',
       targetTheme: 'becise',
       allKeys: ['primary', 'secondary', 'slideBg', 'slideText'],
@@ -173,7 +192,11 @@ export default {
       }
       this.$nextTick(()=> this.renderColors = true);
     },
-
+    changeTarget(key) {
+      this.showPicker = false;
+      this.targetKey = key;
+      this.$nextTick(()=> this.showPicker = true);
+    }
   },
   watch:{
     'scheme.usePct':{
@@ -205,7 +228,9 @@ input.form-control {
 .slide {
   margin: 10px;
   position: relative;
-
+  *{
+    font-size: inherit;
+  }
   .heading {
     width: 100%;
     position: absolute;
@@ -226,6 +251,11 @@ input.form-control {
     padding:20px 40px;
     height: 500px;
     width: 100%;
+  }
+  .brand-slide{
+    .heading{
+
+    }
   }
   height: 900px;
   width: 1400px;
