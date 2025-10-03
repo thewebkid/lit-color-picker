@@ -1,6 +1,6 @@
 import colors from './colorConstants.js';
 import { Color } from './Color.js';
-
+import {reactive} from 'vue';
 const px = n => `${n}px`;
 
 class ColorScheme {
@@ -10,16 +10,32 @@ class ColorScheme {
   light2;
   dark1 = Color.parse('black');
   slideText = Color.parse('black');
+  slideHeading = Color.parse('black');
   dark2;
   primary = Color.parse(colors.blue500);
-  primaryDark;
-  primaryLight;
-  secondary;
+  primary1;
+  primary2;
+  primary3;
+  primary4;
+  primary5;
+  secondary = Color.parse(colors.gray500);
+  secondary1;
+  secondary2;
+  secondary3;
+  secondary4;
+  secondary5;
   accent1;
   accent2;
   accent3;
   fontFamily;
-
+  variantStruct = [
+    [40,100],
+    [70,100],
+    [100,100],
+    [100,70],
+    [100,40]
+  ];
+  usePct = false;
   constructor({ font = `"Helvetica Neue", Inter`, colors = {} }, name = 'default') {
     this.name = name;
     Object.entries(colors).forEach(([name, color]) => (this[name] = Color.parse(color)));
@@ -60,24 +76,27 @@ class ColorScheme {
   setSecondary(c) {
     this.genThemeVariants(c ?? this.secondary, 'secondary');
   }
-
+  updateVariantFormula(struct){
+    this.variantStruct = struct;
+    this.setPrimary();
+    this.setSecondary();
+  }
   genThemeVariants(c, key) {
     let { h } = c.hsv;
     this[key] = c;
-    this[`${key}1`] = Color.parse({ h, s: 40, v: 100 });
-    this[`${key}2`] = Color.parse({ h, s: 70, v: 100 });
-    this[`${key}3`] = Color.parse({ h, s: 100, v: 100 });
-    this[`${key}4`] = Color.parse({ h, s: 100, v: 70 });
-    this[`${key}5`] = Color.parse({ h, s: 100, v: 40 });
+    this.variantStruct.forEach(([s, v, adjSat], i) => {
 
+      this[`${key}${i + 1}`] = this.usePct ?
+        c.saturate(adjSat / 100).toValue(v) :
+        Color.parse({ h, s, v });
+
+    });
   }
 }
 
 class SlideTheme {
   scheme;
   name;
-  base = {};
-  decorations = {};
   fontSizes = {
     xxl: 80,
     xl: 64,
@@ -99,14 +118,29 @@ class SlideTheme {
 
   get contentBox() {
     return {
-      background: this.scheme.light1,
-      color: this.scheme.dark1,
-      fontSize: this.fontSizes.xs,
+      background: this.scheme.slideBg,
+      color: this.scheme.slideText,
+      fontSize: px(this.fontSizes.xs),
       fontWeight: 400,
       fontFamily: this.scheme.fontFamily
     };
   }
+  get accentBox() {
+    const { primary } = this.scheme;
+    return {
+      background: primary.toAlpha(0),
+      fontSize: px(this.fontSizes.md)
 
+    };
+  }
+  get accentBox2() {
+    const { secondary } = this.scheme;
+    return {
+      background: secondary.toAlpha(0),
+      fontSize: px(this.fontSizes.md)
+
+    };
+  }
   get headingBox() {
     return {
       fontWeight: 600,
@@ -118,7 +152,7 @@ class SlideTheme {
   get headingBoxBrand() {
     return {
       fontWeight: 600,
-      color: this.scheme.dark2,
+      color: this.scheme.slideHeading,
       background: this.scheme.light2.darken(.9)
     };
   }
@@ -140,7 +174,10 @@ class BeciseTheme extends SlideTheme {
   }
 
   get fullBgBrand() {
-    const { primary, secondary } = this.scheme;
+    const { primary5, primary4,primary3 } = this.scheme;
+    let secondary = primary3;
+    let primary = primary4;
+    //let primary = primary;
     const primaryFade = primary.toAlpha(0.03);
     return {
       background: `radial-gradient(circle closest-corner at 79.7% 46.7%,
@@ -157,40 +194,54 @@ class BeciseTheme extends SlideTheme {
   get accentBox() {
     const { primary, secondary } = this.scheme;
     return {
-      background: `rgb(242, 244, 255)`,
-      fontSize: this.fontSizes.md
-
+      background: primary.toAlpha(.2),
+      fontSize: px(this.fontSizes.md),
+      heading:{
+        fontSize: px(this.fontSizes.lg),
+        fontWeight: 600,
+        color:this.scheme.primary5
+      }
     };
   }
-
-  get headingBox1() {
+  get accentBox2() {
+    const { secondary } = this.scheme;
+    return {
+      background: secondary.toAlpha(.2),
+      fontSize: px(this.fontSizes.md),
+      heading: {
+        ...this.accentBox.heading,
+        color: this.scheme.secondary5
+      }
+    };
+  }
+  get headingBox() {
     return {
       fontWeight: 600,
       color: this.scheme.light2,
-      fontSize: this.fontSizes.lg,
+      fontSize: px(this.fontSizes.lg),
       ...this.brandBox
     };
   }
 
   get brandBox() {
-    const { primary, secondary } = this.scheme;
+    const { primary, primary4 } = this.scheme;
     return {
-      background: `linear-gradient(90deg, ${primary} -26.08%, ${secondary} 85.04%)`
+      background: `linear-gradient(90deg, ${primary} -26.08%, ${primary4} 85.04%)`
     };
   }
 
   get brandSlide() {
     return {
-      background: this.fullBgBrand,
-      color: this.scheme.light1.css
+      ...this.fullBgBrand,
+      color: this.scheme.light1
     };
   }
 }
 
 // Export themes for extensibility
-export const slideThemes = {
+export const slideThemes = reactive({
   default: SlideTheme.create('default'),
   becise: BeciseTheme.create('becise')
-};
+});
 
 window.Color = Color;

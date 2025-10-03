@@ -491,7 +491,9 @@ export class Color {
     const cmyk = this.cmyk;
     return `cmyka(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%, ${cmyk.a})`;
   }
-
+  get isGrayScale(){
+    return this.r === this.g && this.g === this.b;
+  }
   /** Functions **/
   toString(format = 'rgb') {// accepts rgb, rgbaHex, hex, hsl, hsla, cmyk, cmyka
     let s;
@@ -559,6 +561,11 @@ export class Color {
     return this.lighten(ratio, true);
   }
   saturate(ratio, reverse = false) {
+    if (ratio === 0) return this;
+    if (ratio < 0) {
+      reverse = true;
+      ratio = - ratio;
+    }
     return this.adjustSatLum('s', ratio, reverse);
   }
   desaturate(ratio) {
