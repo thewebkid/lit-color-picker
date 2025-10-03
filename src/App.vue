@@ -49,7 +49,7 @@
             <td>Sat:
               <b-form-input
                 v-if="scheme.usePct"
-                type="number" :min="1" :max="100"
+                type="number" :min="-99" :max="100"
                 size="sm" :modelValue="sv[2]"
                 @input="updateSatVal(i,2, $event)"
               />
@@ -177,7 +177,8 @@ export default {
       this.renderColors = false;
 
       this.$nextTick(()=> {
-        let v = Math.max(20, Math.min(100, parseInt(value)));
+        const min = j === 2 ? -99 : 20;
+        let v = Math.max(min, Math.min(100, parseInt(value)));
         this.satValAdjust[i][j] = v;
         this.scheme.updateVariantFormula(this.satValAdjust);
 
