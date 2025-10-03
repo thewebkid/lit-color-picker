@@ -29,11 +29,11 @@ class ColorScheme {
   accent3;
   fontFamily;
   variantStruct = [
-    [40,100],
-    [70,100],
-    [100,100],
-    [100,70],
-    [100,40]
+    [40, 100, -30],
+    [70, 100, -15],
+    [100, 100, 0],
+    [100, 70, 15],
+    [100, 40, 30]
   ];
   usePct = true;
   constructor({ font = `"Helvetica Neue", Inter`, colors = {} }, name = 'default') {
