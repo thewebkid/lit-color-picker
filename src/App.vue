@@ -74,7 +74,7 @@
         <!--        <b-table-->
       </BCol>
       <BCol v-if="renderColors">
-        <div style="transform: scale(.75);position: relative;left:-200px;top:-200px">
+        <div style="transform: scale(.75);position: relative;left:-200px;top:-300px">
           <div class="slide" :style="theme.slideRoot">
             <div class="heading" :style="theme.headingBox">headingBox</div>
             <div class="d-flex w-100 slide-content">

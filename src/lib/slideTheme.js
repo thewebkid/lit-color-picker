@@ -203,6 +203,7 @@ class BeciseTheme extends SlideTheme {
     return {
       background: primary.toAlpha(.2),
       fontSize: px(this.fontSizes.md),
+      borderRadius: px(20),
       heading:{
         fontSize: px(this.fontSizes.lg),
         fontWeight: 600,
@@ -215,6 +216,7 @@ class BeciseTheme extends SlideTheme {
     return {
       background: secondary.toAlpha(.2),
       fontSize: px(this.fontSizes.md),
+      borderRadius: px(20),
       heading: {
         ...this.accentBox.heading,
         color: this.scheme.secondary5
