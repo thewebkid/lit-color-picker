@@ -35,7 +35,7 @@ class ColorScheme {
     [100,70],
     [100,40]
   ];
-  usePct = false;
+  usePct = true;
   constructor({ font = `"Helvetica Neue", Inter`, colors = {} }, name = 'default') {
     this.name = name;
     Object.entries(colors).forEach(([name, color]) => (this[name] = Color.parse(color)));
@@ -164,6 +164,11 @@ class SlideTheme {
       fontSize: px(this.fontSizes.md),
     }
   }
+  get separator(){
+    return {
+      background: this.scheme.slideText.toAlpha(.2),
+    }
+  }
 }
 
 class BeciseTheme extends SlideTheme {
@@ -199,11 +204,12 @@ class BeciseTheme extends SlideTheme {
   }
 
   get accentBox() {
-    const { primary, secondary } = this.scheme;
+    const { primary, secondary, primary5 } = this.scheme;
     return {
       background: primary.toAlpha(.2),
       fontSize: px(this.fontSizes.md),
       borderRadius: px(20),
+      border: `1.5px solid ${primary5}`,
       heading:{
         fontSize: px(this.fontSizes.lg),
         fontWeight: 600,

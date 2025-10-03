@@ -119,7 +119,14 @@
                   <li>Content 2</li>
                   <li>Content 3</li>
                 </ul>
+                <div class="separator" :style="theme.separator"></div>
 
+
+                <ul>
+                  <li>Content 1</li>
+                  <li>Content 2</li>
+                  <li>Content 3</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -239,6 +246,11 @@ input.form-control {
     padding: 4%;
     margin-bottom: 200px;
     //font-size: 80px;
+  }
+  .separator{
+    height:2px;
+    width:100%;
+    margin:16px 0;
   }
   .slide-content{
     position: relative;
