@@ -150,6 +150,7 @@ class SlideTheme {
   get slideRoot(){
     return {
       background: this.scheme.slideBg,
+      '--fontFamily': this.scheme.fontFamily,
       '--textColor': this.scheme.slideText,
       '--fontSize': px(this.fontSizes.sm),
       '--separatorColor': this.scheme.primary1.hex,

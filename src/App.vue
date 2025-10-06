@@ -157,6 +157,7 @@
 import { slideThemes } from './lib/slideTheme.js';
 import { BDropdownItem, BFormCheckbox, BFormInput, BRow, BTable, BThead } from 'bootstrap-vue-next';
 
+
 export default {
   name: 'App',
   components: { BDropdownItem, BFormCheckbox, BFormInput, BThead, BTable, BRow },
@@ -176,8 +177,7 @@ export default {
       ]
     };
   },
-  computed: { slideThemes() {
-return slideThemes} ,
+  computed: { slideThemes() { return slideThemes} ,
     theme() {
       return slideThemes[this.targetTheme];
     },
@@ -226,6 +226,9 @@ return slideThemes} ,
       this.$nextTick(()=> this.renderColors = true);
     }
   },
+  mounted() {
+    console.log(slideThemes);
+  },
   watch:{
     'scheme.usePct':{
       handler(v){
@@ -240,6 +243,7 @@ return slideThemes} ,
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Inter:300,400,500,700');
 @import "./lib/slideboxmodel.scss";
 .swatch {
   height: 14px;
@@ -255,7 +259,7 @@ input.form-control {
   }
 }
 .slide {
-
+  font-family: var(--fontFamily);
   div, ul, li, span, *{
     font-size: var(--fontSize);
     font-family: var(--fontFamily);
