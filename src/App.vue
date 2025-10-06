@@ -106,7 +106,7 @@
             </div>
           </div>
           <div class="slide brand-slide" :style="theme.brandSlide">
-            <div class="heading" :style="theme.headingBoxBrand">Heading</div>
+            <div class="heading">Heading</div>
           </div>
           <div class="slide d-flex" :style="theme.slideRoot">
             <div class="w-50 p-5" :style="theme.brandBox">
@@ -120,8 +120,6 @@
                   <li>Content 3</li>
                 </ul>
                 <div class="separator" :style="theme.separator"></div>
-
-
                 <ul>
                   <li>Content 1</li>
                   <li>Content 2</li>
@@ -181,8 +179,6 @@ export default {
         let v = Math.max(min, Math.min(100, parseInt(value)));
         this.satValAdjust[i][j] = v;
         this.scheme.updateVariantFormula(this.satValAdjust);
-
-
         this.renderColors = true;
       });
     },
@@ -220,6 +216,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import "./lib/slideboxmodel.scss";
 .swatch {
   height: 14px;
   width: 14px;
@@ -234,42 +231,28 @@ input.form-control {
   }
 }
 .slide {
-  margin: 10px;
-  position: relative;
-  *{
-    font-size: inherit;
+
+  div, ul, li, span, *{
+    font-size: var(--fontSize);
+    font-family: var(--fontFamily);
+    color: var(--textColor);
   }
   .heading {
-    width: 100%;
-    position: absolute;
-    top: 0%;
-    left: 0%;
-    padding: 4%;
-    margin-bottom: 200px;
-    //font-size: 80px;
+    font-size: var(--headingFontSize);
+    color: var(--headingColor);
+    font-weight: var(--headingFontWeight);
   }
   .separator{
-    height:2px;
-    width:100%;
-    margin:16px 0;
+    background-color: var(--separatorColor);
   }
-  .slide-content{
-    position: relative;
-    top:200px;
-    .content-box{
-      padding: 20px;
-    }
-  }
-  .accentBoxContent{
-    padding:20px 40px;
-    height: 500px;
-    width: 100%;
-  }
-  .brand-slide{
+
+  /*.accentBoxContent{
+  }*/
+  /*.brand-slide{
     .heading{
 
     }
-  }
+  }*/
   height: 900px;
   width: 1400px;
   box-shadow: 0 0 10px black;

@@ -1,0 +1,33 @@
+.slide {
+  margin: 10px;
+  position: relative;
+
+  .heading {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 4%;
+    margin-bottom: 200px;
+  }
+  .separator{
+    height:2px;
+    width:100%;
+    margin:16px 0;
+  }
+  .slide-content{
+    position: relative;
+    top:200px;
+    .content-box{
+      padding: 20px;
+    }
+  }
+  .accentBoxContent{
+    padding:20px 40px;
+    height: 500px;
+    width: 100%;
+  }
+  height: 900px;
+  width: 1400px;
+  box-shadow: 0 0 10px black;
+}

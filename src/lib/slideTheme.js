@@ -120,48 +120,41 @@ class SlideTheme {
     return {
       background: this.scheme.slideBg,
       color: this.scheme.slideText,
-      fontSize: px(this.fontSizes.xs),
-      fontWeight: 400,
-      fontFamily: this.scheme.fontFamily
+      '--fontSize': px(this.fontSizes.md),
+      '--fontWeight': 400,
+      '--fontFamily': this.scheme.fontFamily
     };
   }
   get accentBox() {
     const { primary } = this.scheme;
     return {
-      background: primary.toAlpha(0),
-      fontSize: px(this.fontSizes.md)
-
+      ...this.contentBox,
+      background: primary.toAlpha(0)
     };
   }
   get accentBox2() {
     const { secondary } = this.scheme;
     return {
-      background: secondary.toAlpha(0),
-      fontSize: px(this.fontSizes.md)
+      ...this.contentBox,
+      background: secondary.toAlpha(0)
 
     };
   }
   get headingBox() {
     return {
       fontWeight: 600,
-      background: this.scheme.light1,
-      color: this.scheme.dark1
-    };
-  }
-
-  get headingBoxBrand() {
-    return {
-      fontWeight: 600,
-      color: this.scheme.slideHeading.negate(),
-      fontSize: px(this.fontSizes.xl),
-      //background: this.scheme.slideText.darken(.9)
+      background: this.scheme.slideBg,
+      '--textColor': this.scheme.slideText
     };
   }
   get slideRoot(){
     return {
       background: this.scheme.slideBg,
-      color: this.scheme.slideText,
-      fontSize: px(this.fontSizes.md),
+      '--textColor': this.scheme.slideText,
+      '--fontSize': px(this.fontSizes.sm),
+      '--separatorColor': this.scheme.primary1.hex,
+      '--headingColor': this.scheme.slideHeading,
+      '--headingFontSize': px(this.fontSizes.xl),
     }
   }
   get separator(){
@@ -208,8 +201,8 @@ class BeciseTheme extends SlideTheme {
     return {
       background: primary.toAlpha(.2),
       fontSize: px(this.fontSizes.md),
-      borderRadius: px(20),
-      border: `1.5px solid ${primary5}`,
+      //borderRadius: px(20),
+      //border: `1.5px solid ${primary5}`,
       heading:{
         fontSize: px(this.fontSizes.lg),
         fontWeight: 600,
@@ -222,7 +215,7 @@ class BeciseTheme extends SlideTheme {
     return {
       background: secondary.toAlpha(.2),
       fontSize: px(this.fontSizes.md),
-      borderRadius: px(20),
+      //borderRadius: px(20),
       heading: {
         ...this.accentBox.heading,
         color: this.scheme.secondary5
@@ -242,14 +235,19 @@ class BeciseTheme extends SlideTheme {
     const { primary, primary4 } = this.scheme;
     return {
       background: `linear-gradient(90deg, ${primary} -26.08%, ${primary4} 85.04%)`,
-      color: this.scheme.slideText.negate()
+      '--textColor': 'white',
+      '--headingColor': 'white'
     };
   }
 
   get brandSlide() {
     return {
+      ...this.slideRoot,
       ...this.fullBgBrand,
-      color: this.scheme.slideText.negate(),
+      '--textColor': 'white',
+      '--headingColor': 'white',
+      '--headingFontWeight': 600,
+      '--headingFontSize': px(this.fontSizes.xl),
     };
   }
 }
