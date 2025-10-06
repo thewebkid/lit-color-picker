@@ -3,7 +3,19 @@
   <BContainer fluid class="py-4">
     <BRow>
       <BCol>
-        {{ scheme.name }}
+        <b-dropdown no-caret>
+          <template #button-content>
+            <div class="d-flex me-4">
+
+              <div>{{ theme.name }}</div>
+              <span>...</span>
+            </div>
+          </template>
+          <b-dropdown-item
+            v-for="(name,i) in Object.keys(slideThemes)" :key="`theme${i}`"
+            @click="swapTheme(name)"
+          >{{name}}</b-dropdown-item>
+        </b-dropdown>
         <b-dropdown no-caret>
           <template #button-content>
             <div class="d-flex me-4">
@@ -87,6 +99,12 @@
                       <li>Content 2</li>
                       <li>Content 3</li>
                     </ul>
+                    <div class="separator" :style="theme.separator"></div>
+                  <ul>
+                    <li>Content 1</li>
+                    <li>Content 2</li>
+                    <li>Content 3</li>
+                  </ul>
                   </div>
                 </div>
               </div>
@@ -137,11 +155,11 @@
 
 <script>
 import { slideThemes } from './lib/slideTheme.js';
-import { BFormCheckbox, BFormInput, BRow, BTable, BThead } from 'bootstrap-vue-next';
+import { BDropdownItem, BFormCheckbox, BFormInput, BRow, BTable, BThead } from 'bootstrap-vue-next';
 
 export default {
   name: 'App',
-  components: { BFormCheckbox, BFormInput, BThead, BTable, BRow },
+  components: { BDropdownItem, BFormCheckbox, BFormInput, BThead, BTable, BRow },
   data() {
     return {
       renderColors: true,
@@ -158,7 +176,8 @@ export default {
       ]
     };
   },
-  computed: {
+  computed: { slideThemes() {
+return slideThemes} ,
     theme() {
       return slideThemes[this.targetTheme];
     },
@@ -200,6 +219,11 @@ export default {
       this.showPicker = false;
       this.targetKey = key;
       this.$nextTick(()=> this.showPicker = true);
+    },
+    swapTheme(theme) {
+      this.renderColors = false;
+      this.targetTheme = theme;
+      this.$nextTick(()=> this.renderColors = true);
     }
   },
   watch:{
