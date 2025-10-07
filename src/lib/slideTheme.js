@@ -34,14 +34,6 @@ class ColorScheme {
   accent2;
   accent3;
   fontFamily;
-  variantStruct = [
-    [40, 100, -30],
-    [70, 100, -15],
-    [100, 100, 0],
-    [100, 70, 15],
-    [100, 40, 30]
-  ];
-  usePct = true;
   constructor({ font = `"Helvetica Neue", Inter`, colors = {} }, name = 'default') {
     this.name = name;
     Object.entries(colors).forEach(([name, color]) => (this[name] = Color.parse(color)));
@@ -82,11 +74,7 @@ class ColorScheme {
   setSecondary(c) {
     this.genThemeVariants(c ?? this.secondary, 'secondary');
   }
-  updateVariantFormula(struct){
-    this.variantStruct = struct;
-    this.setPrimary();
-    this.setSecondary();
-  }
+
   genThemeVariants(c, key) {
     let { h } = c.hsv;
     this[key] = c;

@@ -151,13 +151,6 @@ export default {
       targetKey: 'primary',
       targetTheme: 'artera',
       allKeys: ['primary', 'secondary', 'slideBg', 'slideText'],
-      satValAdjust:[
-        [40, 100, -30],
-        [70, 100, -15],
-        [100, 100, 0],
-        [100, 70, 15],
-        [100, 40, 30]
-      ],
       primaryShades:[],
       secondaryShades:[]
     };
