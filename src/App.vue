@@ -68,7 +68,7 @@
         <div style="transform: scale(.75);position: relative;left:-200px;top:-300px">
           <div class="slide" :style="theme.slideRoot">
             <div class="heading" :style="theme.headingBox">
-              <div class="headingText">headingBox</div>
+              <div class="headingText" text="headingBox">headingBox</div>
             </div>
             <div class="d-flex w-100 slide-content">
               <div class="w-50 p-5">
@@ -149,7 +149,7 @@ export default {
       renderColors: true,
       showPicker: true,
       targetKey: 'primary',
-      targetTheme: 'artera',
+      targetTheme: 'lockton',
       allKeys: ['primary', 'secondary', 'slideBg', 'slideText'],
       primaryShades:[],
       secondaryShades:[]
@@ -168,17 +168,7 @@ export default {
 
   },
   methods: {
-    updateSatVal(i,j,value) {
-      this.renderColors = false;
 
-      this.$nextTick(()=> {
-        const min = j === 2 ? -99 : 20;
-        let v = Math.max(min, Math.min(100, parseInt(value)));
-        this.satValAdjust[i][j] = v;
-        this.scheme.updateVariantFormula(this.satValAdjust);
-        this.renderColors = true;
-      });
-    },
     onColorUpdated(event) {
       const { color } = event.detail;
       console.log({ color,event });
@@ -212,20 +202,13 @@ export default {
   mounted() {
     //console.log(slideThemes);
   },
-  watch:{
-    'scheme.usePct':{
-      handler(v){
-        this.renderColors = false;
-        this.scheme.updateVariantFormula(this.satValAdjust);
-        this.$nextTick(()=> this.renderColors = true);
-      }
-    }
-  }
 
 };
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Inter:300,400,500,700');
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,700');
 @import "./lib/slideboxmodel.scss";
@@ -244,17 +227,36 @@ input.form-control {
 }
 .slide {
   font-family: var(--fontFamily);
+  overflow: hidden;
   div, ul, li, span, *{
     font-size: var(--fontSize);
     font-family: var(--fontFamily);
     color: var(--textColor);
   }
   .heading {
+    position: relative;
+    z-index: 1;
     font-size: var(--headingFontSize);
     color: var(--headingColor);
     font-weight: var(--headingFontWeight);
+    font-family: var(--headingFontFamily);
     .headingText{
       position: relative;
+      font-size: inherit;
+      color: transparent;
+      font-weight: inherit;
+      font-family: inherit;
+      z-index: 2;
+      &:after{
+        content: attr(text);
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 2;
+        color:var(--headingColor);
+        height:inherit;
+        width: inherit;
+      }
       &:before{
         content: '';
         position: absolute;
@@ -263,6 +265,7 @@ input.form-control {
         left: 0;
         bottom: var(--headingLineOffY);
         background: var(--headingLine);
+        z-index: 1;
       }
     }
   }
@@ -280,6 +283,19 @@ input.form-control {
     left: 0;
     background: var(--pseudoBg);
     //z-index: -1;
+  }
+  &:before{
+    content: '';
+    display: block;
+    position: absolute;
+    pointer-events: none;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    background: var(--pseudoFg);
+    mix-blend-mode: var(--fgBlendMode);
+    overflow: hidden;
+    z-index: 1;
   }
   /*.accentBoxContent{
   }*/

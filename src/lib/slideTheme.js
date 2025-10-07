@@ -34,7 +34,7 @@ class ColorScheme {
   accent2;
   accent3;
   fontFamily;
-  constructor({ font = `"Helvetica Neue", Inter`, colors = {} }, name = 'default') {
+  constructor({ font = `"Helvetica Neue", Inter`, colors = {}, headingFont }, name = 'default') {
     this.name = name;
     Object.entries(colors).forEach(([name, color]) => (this[name] = Color.parse(color)));
     if (!this.light2) {
@@ -59,6 +59,7 @@ class ColorScheme {
       this.primaryLight = this.primary.lighten(.2);
     }
     this.fontFamily = font;
+    this.headingFont = headingFont ?? font;
     this.setPrimary();
     this.setSecondary();
   }
@@ -152,6 +153,7 @@ class SlideTheme {
       '--headingColor': this.scheme.slideHeading,
       '--headingFontSize': px(this.fontSizes.lg),
       '--headingFontWeight': 600,
+      '--headingFontFamily': this.scheme.headingFont ?? this.scheme.font
     }
   }
   get separator(){
@@ -335,10 +337,69 @@ class ArteraTheme extends BeciseTheme {
     };
   }
 }
+class LocktonTheme extends ArteraTheme {
+  constructor(name) {
+    super(name);
+    this.scheme = ColorScheme.create({
+      colors: {
+        primary: Color.fromHex('#009ee3')
+      },headingFont:'"EB Garamond", sans-serif', font:'"Work Sans", sans-serif'
+    }, 'lockton');
+  }
+  static create(){
+    return new LocktonTheme('lockton');
+  }
+  get fullBgBrand() {
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" style="transform:scale(.8)" width="1921" height="1080" viewBox="0 0 1921 1080">
+  <g filter="url(#blur)">
+    <path d="M192.07 462.56C78.8754 349.365 229.265 64.159 318.609 -64.2949H2074.02V706.431C2080.07 803.334 2024.58 979.03 1754.23 906.59C1483.88 834.151 1534.22 631.002 1593.18 538.482C1383.82 667.32 906.662 924.996 672.913 924.996C439.165 924.996 593.923 492.469 700.521 276.205C578.202 385.488 305.264 575.754 192.07 462.56Z" fill="url(#radial)"/>
+  </g>
+  <defs>
+    <filter id="blur" x="-148.488" y="-364.295" width="2522.94" height="1589.29" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="150" result="effect1_foregroundBlur_4035_36791"/>
+    </filter>
+    <radialGradient id="radial" cx="0" cy="0" r="1"
+    gradientUnits="userSpaceOnUse"
+    gradientTransform="translate(1505.42 140.801) rotate(135.513) scale(986.039 1916.62)">
+      <stop stop-color="#60CFFF"/>
+      <stop offset="1" stop-color="#004360"/>
+    </radialGradient>
+  </defs>
+</svg>`;
+    const black20 = Color.parse('#000000').toAlpha(.2);
+    return {
+      '--pseudoBg': `url(data:image/svg+xml;base64,${btoa(svgString)}) no-repeat -120px -110px black`,
+      //backgroundColor:`black`,
+      '--pseudoFg':`radial-gradient(circle, ${black20} 15%, transparent 15%) 0 0 / 30px 52px,
+            radial-gradient(circle, ${black20} 15%, transparent 15%) 15px 26px / 30px 52px repeat`,
+      '--fgBlendMode':'soft-light'
+    };
+  }
+  get brandBox() {
+    return {
+      background:'black',
+      '--textColor': 'white',
+      '--headingColor': 'white',
+      boxShadow: `20px 0 0 0 ${this.scheme.primary5}`
+    };
+  }
+  get headingBox() {
+    return {
+      ...super.headingBox,
+      background: 'black',
+      '--headingLine':this.scheme.primary5,
+      '--headingLineHeight': px(10),
+      '--headingLineOffY': px(6),
+    };
+  }
+}
 
 // Export themes for extensibility
 export const slideThemes = reactive({
   default: SlideTheme.create('default'),
   becise: BeciseTheme.create('becise'),
   artera: ArteraTheme.create('artera'),
+  lockton: LocktonTheme.create('lockton')
 });
