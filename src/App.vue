@@ -48,51 +48,32 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="(sv,i) in satValAdjust" :key="`p${i}`">
-            <td style="text-align: right">{{ i + 1 }}</td>
+          <tr v-for="n in 8" :key="`p${n}`">
+            <td style="text-align: right">{{ n }}</td>
             <td class="ps-3">
-              <span class="swatch" :style="{backgroundColor: scheme[`primary${i+1}`].css}"></span>
+              <span class="swatch" :style="{backgroundColor: scheme[`primary${n}`].css}"></span>
 
             </td>
             <td class="ps-3">
-              <span class="swatch" :style="{backgroundColor: scheme[`secondary${i+1}`].css}"></span>
+              <span class="swatch" :style="{backgroundColor: scheme[`secondary${n}`].css}"></span>
 
             </td>
-            <td>Sat:
-              <b-form-input
-                v-if="scheme.usePct"
-                type="number" :min="-99" :max="100"
-                size="sm" :modelValue="sv[2]"
-                @input="updateSatVal(i,2, $event)"
-              />
-              <b-form-input
-                v-else
-                type="number" :min="1" :max="100"
-                size="sm" :modelValue="sv[0]"
-                @input="updateSatVal(i, 0, $event)"
-              />
-            </td>
-            <td>Val:
-              <b-form-input
-                type="number" :min="1" :max="100"
-                size="sm" :modelValue="sv[1]"
-                @input="updateSatVal(i,1,$event)"
-              />
-            </td>
+
           </tr>
           </tbody>
         </table>
-        <b-form-checkbox v-model="scheme.usePct">Use Sat Percent Adj instead of fixed</b-form-checkbox>
-        <!--        <b-table-->
+
       </BCol>
       <BCol v-if="renderColors">
         <div style="transform: scale(.75);position: relative;left:-200px;top:-300px">
           <div class="slide" :style="theme.slideRoot">
-            <div class="heading" :style="theme.headingBox">headingBox</div>
+            <div class="heading" :style="theme.headingBox">
+              <div class="headingText">headingBox</div>
+            </div>
             <div class="d-flex w-100 slide-content">
               <div class="w-50 p-5">
                 <div class="content-box accentBox" :style="theme.accentBox">
-                  <div class="accentBoxHeading" :style="theme.accentBox.heading">AccentBoxHeading</div>
+                  <div class="heading accentBoxHeading" :style="theme.accentBox.heading">AccentBoxHeading</div>
                   <div class="accentBoxContent">
                     <ul>
                       <li>Content 1</li>
@@ -110,7 +91,7 @@
               </div>
               <div class="w-50 p-5">
                 <div class="content-box accentBox2" :style="theme.accentBox2">
-                  <div class="accentBoxHeading" :style="theme.accentBox2.heading">AccentBox2Heading</div>
+                  <div class="heading accentBoxHeading" :style="theme.accentBox2.heading">AccentBox2Heading</div>
                   <div class="accentBoxContent">
                     <ul>
                       <li>Content 1</li>
@@ -125,10 +106,12 @@
           </div>
           <div class="slide brand-slide" :style="theme.brandSlide">
             <div class="heading">Heading</div>
+
           </div>
           <div class="slide d-flex" :style="theme.slideRoot">
             <div class="w-50 p-5" :style="theme.brandBox">
               <div class="heading">Panel Text</div>
+              <div style="position:absolute;top:222px">I am content</div>
             </div>
             <div class="w-50 p-5">
               <div class="content-box">
@@ -166,7 +149,7 @@ export default {
       renderColors: true,
       showPicker: true,
       targetKey: 'primary',
-      targetTheme: 'becise',
+      targetTheme: 'artera',
       allKeys: ['primary', 'secondary', 'slideBg', 'slideText'],
       satValAdjust:[
         [40, 100, -30],
@@ -174,7 +157,9 @@ export default {
         [100, 100, 0],
         [100, 70, 15],
         [100, 40, 30]
-      ]
+      ],
+      primaryShades:[],
+      secondaryShades:[]
     };
   },
   computed: { slideThemes() { return slideThemes} ,
@@ -213,6 +198,11 @@ export default {
       }else {
         this.scheme[this.targetKey] = color;
       }
+      this.primaryShades = this.scheme.primary.getShades(10);
+      const formats = ['rgb','hsl','hsv']
+      //console.log(this.primaryShades.map(c=>
+        //formats.map(f=>c.toString(f)).join(',')).join('\n'));
+      this.secondaryShades = this.scheme.secondary.getShades(10);
       this.$nextTick(()=> this.renderColors = true);
     },
     changeTarget(key) {
@@ -227,7 +217,7 @@ export default {
     }
   },
   mounted() {
-    console.log(slideThemes);
+    //console.log(slideThemes);
   },
   watch:{
     'scheme.usePct':{
@@ -244,6 +234,7 @@ export default {
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Inter:300,400,500,700');
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,700');
 @import "./lib/slideboxmodel.scss";
 .swatch {
   height: 14px;
@@ -269,11 +260,34 @@ input.form-control {
     font-size: var(--headingFontSize);
     color: var(--headingColor);
     font-weight: var(--headingFontWeight);
+    .headingText{
+      position: relative;
+      &:before{
+        content: '';
+        position: absolute;
+        height: var(--headingLineHeight);
+        width: 100%;
+        left: 0;
+        bottom: var(--headingLineOffY);
+        background: var(--headingLine);
+      }
+    }
   }
   .separator{
     background-color: var(--separatorColor);
   }
-
+  &:after{
+    content: '';
+    display: block;
+    position: absolute;
+    pointer-events: none;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: var(--pseudoBg);
+    //z-index: -1;
+  }
   /*.accentBoxContent{
   }*/
   /*.brand-slide{

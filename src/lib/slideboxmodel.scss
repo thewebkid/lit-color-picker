@@ -4,11 +4,11 @@
 
   .heading {
     width: 100%;
-    position: absolute;
+    //position: absolute;
     top: 0;
     left: 0;
     padding: 4%;
-    margin-bottom: 200px;
+    //margin-bottom: 200px;
   }
   .separator{
     height:2px;
@@ -17,14 +17,14 @@
   }
   .slide-content{
     position: relative;
-    top:200px;
+    //top:200px;
     .content-box{
       padding: 20px;
     }
   }
   .accentBoxContent{
     padding:20px 40px;
-    height: 500px;
+    height: 450px;
     width: 100%;
   }
   height: 900px;
