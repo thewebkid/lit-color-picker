@@ -3,96 +3,125 @@
   <BContainer fluid class="py-4">
     <BRow>
       <BCol>
-        <b-dropdown no-caret>
-          <template #button-content>
-            <div class="d-flex me-4">
+        <div class="d-flex">
+          <div>
+            <b-dropdown no-caret>
+              <template #button-content>
+                <div class="d-flex me-4">
 
-              <div>{{ theme.name }}</div>
-              <span>...</span>
-            </div>
-          </template>
-          <b-dropdown-item
-            v-for="(name,i) in Object.keys(slideThemes)" :key="`theme${i}`"
-            @click="swapTheme(name)"
-          >{{name}}</b-dropdown-item>
-        </b-dropdown>
-        <b-dropdown no-caret>
-          <template #button-content>
-            <div class="d-flex me-4">
-              <span v-if="renderColors" class="swatch mt-1 me-2" :style="{backgroundColor: scheme[targetKey].css}"></span>
-              <div>{{ targetKey }}</div>
-              <span>...</span>
-            </div>
-          </template>
-          <b-dropdown-item v-for="key in allKeys" :key="key" @click="changeTarget(key)">
-            <div class="d-flex">
-              <span class="swatch mt-1 me-2" :style="{backgroundColor: scheme[key].css}"></span>
-              <div>{{ key }}</div>
-            </div>
-          </b-dropdown-item>
-        </b-dropdown>
-        <color-picker
-          v-if="showPicker"
-          ref="colorPicker" :value="scheme[targetKey].hex"
-          @colorchanged="onColorUpdated"
-        />
+                  <div>{{ theme.name }}</div>
+                  <span>...</span>
+                </div>
+              </template>
+              <b-dropdown-item
+                v-for="(name,i) in Object.keys(slideThemes)" :key="`theme${i}`"
+                @click="swapTheme(name)"
+              >{{name}}</b-dropdown-item>
+            </b-dropdown>
+            <b-dropdown no-caret>
+              <template #button-content>
+                <div class="d-flex me-4">
+                  <span v-if="renderColors" class="swatch mt-1 me-2" :style="{backgroundColor: scheme[targetKey].css}"></span>
+                  <div>{{ targetKey }}</div>
+                  <span>...</span>
+                </div>
+              </template>
+              <b-dropdown-item v-for="key in allKeys" :key="key" @click="changeTarget(key)">
+                <div class="d-flex">
+                  <span class="swatch mt-1 me-2" :style="{backgroundColor: scheme[key].css}"></span>
+                  <div>{{ key }}</div>
+                </div>
+              </b-dropdown-item>
+            </b-dropdown>
+            <color-picker
+              v-if="showPicker"
+              ref="colorPicker" :value="scheme[targetKey].hex"
+              @colorchanged="onColorUpdated"
+            />
 
-        <table v-if="renderColors">
-          <thead>
-          <tr>
-            <th>variants</th>
-            <th v-for="(key, i) in allKeys" :key="`v-${i}`" class="ps-3">
-              <span class="swatch" :style="{backgroundColor: scheme[key].css}"></span>
-              {{ key }}
-            </th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="n in 8" :key="`p${n}`">
-            <td style="text-align: right">{{ n }}</td>
-            <td class="ps-3">
-              <span class="swatch" :style="{backgroundColor: scheme[`primary${n}`].css}"></span>
+            <table v-if="renderColors">
+              <thead>
+              <tr>
+                <th>variants</th>
+                <th v-for="(key, i) in allKeys" :key="`v-${i}`" class="ps-3" @click="changeTarget(key)" style="cursor: pointer">
+                  <span class="swatch" :style="{backgroundColor: scheme[key].css}"></span>
+                  {{ key }}
+                </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="n in 8" :key="`p${n}`">
+                <td style="text-align: right">{{ n }}</td>
+                <td class="ps-3">
+                  <span class="swatch" :style="{backgroundColor: scheme[`primary${n}`].css}" :title="scheme[`primary${n}`].hex"></span>
 
-            </td>
-            <td class="ps-3">
-              <span class="swatch" :style="{backgroundColor: scheme[`secondary${n}`].css}"></span>
+                </td>
+                <td class="ps-3">
+                  <span class="swatch" :style="{backgroundColor: scheme[`secondary${n}`].css}" :title="scheme[`secondary${n}`].hex"></span>
 
-            </td>
+                </td>
 
-          </tr>
-          </tbody>
-        </table>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex-grow-1" v-if="renderColors">
+            <div style="transform: scale(.75);position: relative;left:-200px;top:-300px">
+              <div class="slide" :style="theme.slideRoot">
+                <div class="heading" :style="theme.headingBox">
+                  <div class="headingText" text="Heading Text">Heading Text</div>
+                </div>
+                <div class="d-flex w-100 slide-content">
+                  <div class="w-50 p-5">
+                    <div class="content-box accentBox" :style="theme.accentBox">
+                      <div class="heading accentBoxHeading" :style="theme.accentBox.heading">AccentBoxHeading</div>
+                      <div class="accentBoxContent">
+                        <ul>
+                          <li>Content 1</li>
+                          <li>Content 2</li>
+                          <li>Content 3</li>
+                        </ul>
+                        <div class="separator" :style="theme.separator"></div>
+                        <ul>
+                          <li>Content 1</li>
+                          <li>Content 2</li>
+                          <li>Content 3</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-50 p-5">
+                    <div class="content-box accentBox2" :style="theme.accentBox2">
+                      <div class="heading accentBoxHeading" :style="theme.accentBox2.heading">AccentBox2Heading</div>
+                      <div class="accentBoxContent">
+                        <ul>
+                          <li>Content 1</li>
+                          <li>Content 2</li>
+                          <li>Content 3</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
 
-      </BCol>
-      <BCol v-if="renderColors">
-        <div style="transform: scale(.75);position: relative;left:-200px;top:-300px">
-          <div class="slide" :style="theme.slideRoot">
-            <div class="heading" :style="theme.headingBox">
-              <div class="headingText" text="headingBox">headingBox</div>
-            </div>
-            <div class="d-flex w-100 slide-content">
-              <div class="w-50 p-5">
-                <div class="content-box accentBox" :style="theme.accentBox">
-                  <div class="heading accentBoxHeading" :style="theme.accentBox.heading">AccentBoxHeading</div>
-                  <div class="accentBoxContent">
+                </div>
+              </div>
+              <div class="slide brand-slide" :style="theme.brandSlide">
+                <div class="heading">Heading</div>
+
+              </div>
+              <div class="slide d-flex" :style="theme.slideRoot">
+                <div class="w-50 p-5" :style="theme.brandBox">
+                  <div class="heading">Panel Text</div>
+                  <div style="position:absolute;top:222px">I am content</div>
+                </div>
+                <div class="w-50 p-5">
+                  <div class="content-box">
                     <ul>
                       <li>Content 1</li>
                       <li>Content 2</li>
                       <li>Content 3</li>
                     </ul>
                     <div class="separator" :style="theme.separator"></div>
-                  <ul>
-                    <li>Content 1</li>
-                    <li>Content 2</li>
-                    <li>Content 3</li>
-                  </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="w-50 p-5">
-                <div class="content-box accentBox2" :style="theme.accentBox2">
-                  <div class="heading accentBoxHeading" :style="theme.accentBox2.heading">AccentBox2Heading</div>
-                  <div class="accentBoxContent">
                     <ul>
                       <li>Content 1</li>
                       <li>Content 2</li>
@@ -101,35 +130,13 @@
                   </div>
                 </div>
               </div>
+            </div>
 
-            </div>
-          </div>
-          <div class="slide brand-slide" :style="theme.brandSlide">
-            <div class="heading">Heading</div>
-
-          </div>
-          <div class="slide d-flex" :style="theme.slideRoot">
-            <div class="w-50 p-5" :style="theme.brandBox">
-              <div class="heading">Panel Text</div>
-              <div style="position:absolute;top:222px">I am content</div>
-            </div>
-            <div class="w-50 p-5">
-              <div class="content-box">
-                <ul>
-                  <li>Content 1</li>
-                  <li>Content 2</li>
-                  <li>Content 3</li>
-                </ul>
-                <div class="separator" :style="theme.separator"></div>
-                <ul>
-                  <li>Content 1</li>
-                  <li>Content 2</li>
-                  <li>Content 3</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
+
+
+
 
       </BCol>
     </BRow>
@@ -228,6 +235,7 @@ input.form-control {
 .slide {
   font-family: var(--fontFamily);
   overflow: hidden;
+  display: inline-block;
   div, ul, li, span, *{
     font-size: var(--fontSize);
     font-family: var(--fontFamily);

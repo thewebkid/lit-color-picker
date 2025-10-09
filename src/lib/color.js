@@ -643,10 +643,7 @@ export class Color {
     }
     return this.adjustSatLum('s', ratio, reverse);
   }
-  desaturate(ratio, debug) {
-    if (debug){
-      debugger
-    }
+  desaturate(ratio) {
     const {h,l} = this.hsl;
     if (ratio >= 1) return Color.fromHsl({h, l, s: 0});
     return Color.fromHsl({h, l, s: maxVal(100, l * (1 - ratio))});
