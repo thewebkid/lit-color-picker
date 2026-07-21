@@ -21,12 +21,16 @@ export class HueBar extends LitElement {
       position: relative;
     }
 
-    :host .slider {
-      position: absolute;
+    :host movable-el {
       top: -1px;
+      /* In-flow thumb so the host has a non-zero drag target. */
+      margin-left: -4px;
+    }
+
+    :host .slider {
+      display: block;
       height: 17px;
       width: 8px;
-      margin-left: -4px;
       box-shadow: 0 0 3px #111, inset 0 0 2px white;
     }
   `;
@@ -40,15 +44,19 @@ export class HueBar extends LitElement {
   }
 
   firstUpdated() {
-    let me = this.renderRoot.querySelector('lit-movable');
-    me.onmovestart = () => {
-      colorEvent(this.renderRoot, { sliding: true }, 'sliding-hue');
-    };
-    me.onmoveend = () => {
-      colorEvent(this.renderRoot, { sliding: false }, 'sliding-hue');
-    };
-    me.onmove = ({ posLeft }) => this.selectHue({offsetX: posLeft});
     this.sliderStyle = this.sliderCss(this.hue);
+  }
+
+  onSliderStart() {
+    colorEvent(this.renderRoot, { sliding: true }, 'sliding-hue');
+  }
+
+  onSliderEnd() {
+    colorEvent(this.renderRoot, { sliding: false }, 'sliding-hue');
+  }
+
+  onSliderMove({ detail: { posLeft } }) {
+    this.selectHue({ offsetX: posLeft });
   }
 
   get sliderBounds(){
@@ -101,12 +109,19 @@ export class HueBar extends LitElement {
 
   render() {
 
+    const { min, max, posLeft } = this.sliderBounds;
+    // posLeft BEFORE boundsX: lit-movable parses bounds relative to current style.left.
     return html`
       <div style=${styleMap(this.gradient)} class='bar' @click='${this.selectHue}'>
-        <lit-movable horizontal='${this.sliderBounds.min}, ${this.sliderBounds.max}' posLeft='${this.sliderBounds.posLeft}'>
-          <a class='slider' style=${styleMap(this.sliderCss(this.h))}></a>
-        </lit-movable>
-
+        <movable-el
+          axis='x'
+          .posLeft=${posLeft}
+          .boundsX=${`${min}, ${max}`}
+          @movestart=${this.onSliderStart}
+          @move=${this.onSliderMove}
+          @moveend=${this.onSliderEnd}>
+          <a class='slider' style=${styleMap(this.sliderCss(this.hue))}></a>
+        </movable-el>
       </div>`;
   }
 }

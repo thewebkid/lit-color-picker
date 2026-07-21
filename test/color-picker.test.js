@@ -179,7 +179,7 @@ describe('ColorPicker', () => {
     await clickCenter(canvas);
 
     //ensure movable circle properly repositioned
-    const me = hslc.shadowRoot.querySelector('lit-movable');
+    const me = hslc.shadowRoot.querySelector('movable-el');
     expect(me.offsetLeft).to.be.eq(offsetWidth / 2);
     expect(me.offsetTop).to.be.eq(offsetHeight / 2);
 

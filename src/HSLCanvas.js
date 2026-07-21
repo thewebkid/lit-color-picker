@@ -26,15 +26,21 @@ export class HSLCanvas extends LitElement {
       cursor: pointer;
     }
 
+    /* In-flow so <movable-el> gets a real hit box (absolute children collapse the host to 0×0). */
+    :host movable-el {
+      z-index: 1;
+      /* Center the knob on the sample point (host's top/left). */
+      margin: -8px 0 0 -8px;
+    }
+
     :host .circle {
       height: 12px;
       width: 12px;
       border: solid 2px #eee;
       border-radius: 50%;
       box-shadow: 0 0 3px #000, inset 0 0 1px #fff;
-      position: absolute;
-      margin: -8px;
       mix-blend-mode: difference;
+      pointer-events: auto;
     }
   `;
 
@@ -51,11 +57,19 @@ export class HSLCanvas extends LitElement {
   }
 
   setCircleCss(x, y) {
-    let left = `${x}`;
-    let top = `${y}`;
-    let bounds = {x: `0, ${this.size}`, y: `0,${this.size}`};
-    //let bounds = {x: `${-x}, ${this.size-x}`,y:`${-y},${this.size-y}`}
-    this.circlePos = { top, left, bounds};
+    // lit-movable bounds are relative to the current pos; keep the knob center on-canvas
+    // (the 16px knob may overhang — that's intentional).
+    const left = Number(x);
+    const top = Number(y);
+    const size = this.size;
+    this.circlePos = {
+      top,
+      left,
+      bounds: {
+        x: `${-left}, ${size - left}`,
+        y: `${-top}, ${size - top}`,
+      },
+    };
   }
 
   pickCoord({ offsetX, offsetY }) {
@@ -142,16 +156,20 @@ export class HSLCanvas extends LitElement {
   }
 
   render() {
-    let hw = { height: this.size + 'p', width: this.size + 'px' };
+    let hw = { height: this.size + 'px', width: this.size + 'px' };
     let {top, left, bounds} = this.circlePos;
+    // pos* BEFORE bounds*: lit-movable parses bounds relative to current style.left/top.
     return html`
       <div class='outer' @click='${this.pickCoord}' style='${styleMap(hw)}'>
         <canvas height='100' width='100'></canvas>
-        <lit-movable
-          boundsX='${bounds.x}' boundsY='${bounds.y}'
-          posTop='${top}' posLeft='${left}' .onmove='${(e) => this.circleMove(e)}'>
+        <movable-el
+          .posTop=${top}
+          .posLeft=${left}
+          .boundsX=${bounds.x}
+          .boundsY=${bounds.y}
+          @move=${(e) => this.circleMove(e.detail)}>
           <div class='circle'></div>
-        </lit-movable>
+        </movable-el>
       </div>`;
   }
 }

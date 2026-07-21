@@ -1,16 +1,14 @@
-// noinspection ES6UnusedImports
-
-import { css, html, LitElement } from 'lit';
+import { html, LitElement } from 'lit';
 import { Color, namedColors } from 'modern-color';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
-// todo: understand why eslint thinks these are unused - they are dependencies
-import { HueBar } from './HueBar.js';
-import { ColorInputChannel } from './ColorInputChannel.js';
-import { HSLCanvas } from './HSLCanvas.js';
-import { focusedFormControl, formControl, root, transparentChex } from './css.js';
+// Side-effect imports: register child custom elements used in the template
+import './HueBar.js';
+import './ColorInputChannel.js';
+import './HSLCanvas.js';
+import 'lit-movable';
+import { root } from './css.js';
 import { colorEvent, copy } from './lib.js';
-import { LitMovable } from 'lit-movable';
 
 //todo: light/dark mode + get decorators working without typescript
 export class ColorPicker extends LitElement {
