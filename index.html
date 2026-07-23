@@ -38,7 +38,7 @@
       cp = document.querySelector('color-picker');
       button.value = cp.color.hex;
       console.log({ cp });
-      cp.addEventListener('colorchanged', (event) => {
+      cp.addEventListener('color-change', (event) => {
         const { color } = event.detail;
         const cssVar = document.querySelector('select').value;
         if (rules[cssVar]) {
@@ -47,7 +47,7 @@
           updateTheme();
         }
       });
-      cp.addEventListener('colorpicked', (event) => {
+      cp.addEventListener('color-pick', (event) => {
         const { color } = event.detail;
         button.value = color.hex;
         cp.style.display = 'none';

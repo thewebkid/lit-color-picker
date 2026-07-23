@@ -1,29 +1,30 @@
 import { Color } from 'modern-color';
-import {html} from 'lit';
+import { html } from 'lit';
 
-export const colorEvent = (target, color, name = 'color-update') => {
-  const detail = name.includes('color') ? {color} : color;
-  let event = new CustomEvent(name, {
-    bubbles: true,
-    composed: true,
-    detail
-  });
-  target.dispatchEvent(event);
+/** Generic composed CustomEvent helper (used for non-color UI signals like sliding-hue). */
+export const colorEvent = (target, detail, name) => {
+  target.dispatchEvent(
+    new CustomEvent(name, {
+      bubbles: true,
+      composed: true,
+      detail,
+    })
+  );
 };
+
 export const hueGradient = (gran = 3, hsx) => {
-  //todo: update to take optional hsx(v/l) vals and compose
   let h = 0;
   let s = 100;
   let l = 50;
   let v = null;
   let isHsv = false;
-  if (hsx){
+  if (hsx) {
     s = hsx.s;
-    if(hsx.hasOwnProperty('v')){
+    if (Object.prototype.hasOwnProperty.call(hsx, 'v')) {
       v = hsx.v;
       l = null;
       isHsv = true;
-    }else{
+    } else {
       l = hsx.l;
     }
   }
@@ -31,13 +32,13 @@ export const hueGradient = (gran = 3, hsx) => {
   let color, pos;
   const cs = (color, pos) => `${color.css} ${(pos * 100).toFixed(1)}%`;
   while (h < 360) {
-    color = Color.parse(isHsv ? {h, s, v} : {h, s, l});
+    color = Color.parse(isHsv ? { h, s, v } : { h, s, l });
     pos = h / 360;
     stops.push(cs(color, pos));
     h += gran;
   }
   h = 359;
-  color = Color.parse(isHsv ? {h, s, v} : {h, s, l});
+  color = Color.parse(isHsv ? { h, s, v } : { h, s, l });
   pos = 1;
   stops.push(cs(color, pos));
   return stops.join(', ');

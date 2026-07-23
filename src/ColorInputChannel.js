@@ -4,7 +4,7 @@ import { hueGradient } from './lib.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { inputChannelRules } from './css.js';
-import { colorEvent } from './lib.js';
+import { emitColorIntent } from './color-state.js';
 
 const labelDictionary = {
   r: 'R (red) channel',
@@ -14,7 +14,7 @@ const labelDictionary = {
   s: 'S (saturation) channel',
   v: 'V (value / brightness) channel',
   l: 'L (luminosity) channel',
-  a: 'A (alpha / opacity) channel'
+  a: 'A (alpha / opacity) channel',
 };
 
 export class ColorInputChannel extends LitElement {
@@ -22,14 +22,15 @@ export class ColorInputChannel extends LitElement {
     group: { type: String },
     channel: { type: String },
     color: { type: Object },
+    /** Parent model polar coords — preferred over deriving from color.hsl/hsv. */
+    hsx: { type: Object, attribute: false },
     isHsl: { type: Boolean },
     c: { type: Object, state: true, attribute: false },
     previewGradient: { type: Object, state: true, attribute: false },
     active: { type: Boolean, state: true, attribute: false },
     max: { type: Number, state: true, attribute: false },
-    v: { type: Number, state: true, attribute: false }
+    v: { type: Number, state: true, attribute: false },
   };
-
 
   static styles = inputChannelRules;
 
@@ -46,39 +47,33 @@ export class ColorInputChannel extends LitElement {
 
   valueChange = (e, val = null) => {
     val = val ?? Number(this.renderRoot.querySelector('input').value);
-    /* if (this.channel === 'a'){
-      val /= 100;
-    } */
-    this.c[this.channel] = val;
-    let c = Color.parse(this.c);
-    if (this.group !== 'rgb'){
-      c.hsx = this.c;
-    }
-    this.c = this.group === 'rgb' ? this.color.rgbObj : this.isHsl ? this.color.hsl : this.color.hsv;
-    colorEvent(this.renderRoot, c);
+    const next = { ...this.c, [this.channel]: val };
+    const color = Color.parse(next);
+
+    // RGB edits clear polar lock; HS* edits keep explicit coords on the intent.
+    const hsx = this.group === 'rgb' ? null : next;
+
+    emitColorIntent(this.renderRoot, {
+      color,
+      source: 'channel',
+      hsx,
+      space: this.isHsl ? 'hsl' : 'hsv',
+    });
   };
 
   setActive(active) {
     this.active = active;
-    if (active){
+    if (active) {
       this.renderRoot.querySelector('input').select();
     }
   }
 
-  constructor() {
-    super();
-  }
-
   setPreviewGradient() {
     let c;
-    if (this.group === 'rgb'){
+    if (this.group === 'rgb') {
       c = this.color.rgbObj;
-    }else {
-      if (this.color.hsx) {
-        c = this.color.hsx;
-      } else {
-        c = this.isHsl ? this.color.hsl : this.color.hsv;
-      }
+    } else {
+      c = this.hsx ?? (this.isHsl ? this.color.hsl : this.color.hsv);
     }
     this.c = c;
     let g = this.group;
@@ -86,7 +81,6 @@ export class ColorInputChannel extends LitElement {
     const isAlpha = ch === 'a';
     this.v = c[ch];
     if (isAlpha) {
-      //this.v *= 100;
       this.v = Math.max(0, Math.min(this.v, 1));
     }
     let max = 255;
@@ -96,7 +90,7 @@ export class ColorInputChannel extends LitElement {
         max = this.max = 359;
         this.previewGradient = {
           '--preview': `linear-gradient(90deg, ${hueGradient(24, c)})`,
-          '--pct': `${100 * (c.h / max)}%`
+          '--pct': `${100 * (c.h / max)}%`,
         };
         return;
       } else if (isAlpha) {
@@ -117,38 +111,46 @@ export class ColorInputChannel extends LitElement {
       midC.l = 50;
       this.previewGradient = {
         '--preview': `linear-gradient(90deg, ${minC.hex}, ${Color.parse(midC).hex}, ${maxC.hex})`,
-        '--pct': `${100 * (c[this.channel] / max)}%`
+        '--pct': `${100 * (c[this.channel] / max)}%`,
       };
     } else {
       this.previewGradient = {
         '--preview': `linear-gradient(90deg, ${isAlpha ? minC.css : minC.hex}, ${isAlpha ? maxC.css : maxC.hex})`,
-        '--pct': `${Math.min(100, Math.max((isAlpha ? 100 : 100) * (c[this.channel] / max), 0))}%`
+        '--pct': `${Math.min(100, Math.max(100 * (c[this.channel] / max), 0))}%`,
       };
     }
   }
 
-  willUpdate(props) {
+  willUpdate() {
     this.setPreviewGradient();
   }
 
   render() {
-    const chex = this.channel === 'a' ? html`<div class='transparent-checks'></div>` : null;
+    const chex =
+      this.channel === 'a' ? html`<div class='transparent-checks'></div>` : null;
     const max = this.channel === 'a' ? 1 : this.max;
     return html`
-      <div class='${classMap({ active: this.active })}'>
-        <label for=channel_${this.ch} >${this.channel.toUpperCase()}</label>
-        <input id=channel_${this.ch} aria-label='${labelDictionary[this.channel]}'
-          class='form-control' .value='${this.channel === 'a' && this.v < 1 ? Math.min(1, this.v).toFixed(2) : Math.round(this.v)}'
-          type='number' min='0' max='${max}' .step='${this.channel === 'a' ? .01 : 1}'
-          @input='${this.valueChange}'
-          @focus='${() => this.setActive(true)}'
-          @blur='${() => this.setActive(false)}'
+      <div class=${classMap({ active: this.active })}>
+        <label for=${`channel_${this.channel}`}>${this.channel.toUpperCase()}</label>
+        <input id=${`channel_${this.channel}`} aria-label=${labelDictionary[this.channel]}
+          class='form-control'
+          .value=${
+            this.channel === 'a' && this.v < 1
+              ? Math.min(1, this.v).toFixed(2)
+              : Math.round(this.v)
+          }
+          type='number' min='0' max=${max} .step=${this.channel === 'a' ? 0.01 : 1}
+          @input=${this.valueChange}
+          @focus=${() => this.setActive(true)}
+          @blur=${() => this.setActive(false)}
         />
-        <div class='preview-bar' style='${styleMap(this.previewGradient)}' @mousedown='${this.clickPreview}'>
+        <div class='preview-bar' style=${styleMap(this.previewGradient)}
+             @mousedown=${this.clickPreview}>
           <div class='pct'></div>
           ${chex}
         </div>
-      </div>`;
+      </div>
+    `;
   }
 }
 

@@ -17,22 +17,22 @@ npm i lit-colorpicker
 
 ```html
 <script type="module">
-  import 'color-picker/color-picker.js';
-  window.addEventListener('load', ()=>{
+  import 'lit-colorpicker';
+  window.addEventListener('load', () => {
     const button = document.querySelector('input');
     const cp = document.querySelector('color-picker');
     cp.style.display = 'none';
     button.value = cp.color.hex;
-    console.log({ cp })
-    cp.addEventListener('colorupdated', ({detail: {color}}) => {
-      console.log({ preview: color, hex: color.hex, rgb: color.css });
+
+    cp.addEventListener('color-change', ({ detail: { color, source } }) => {
+      console.log({ preview: color, hex: color.hex, rgb: color.css, source });
       button.value = color.hex;
     });
-    cp.addEventListener('colorpicked', ({detail: {color}}) => {
+    cp.addEventListener('color-pick', ({ detail: { color } }) => {
       button.value = color.hex;
       cp.style.display = 'none';
     });
-    button.addEventListener('click', (e)=>{
+    button.addEventListener('click', (e) => {
       e.stopImmediatePropagation();
       e.preventDefault();
       cp.style.display = 'block';
@@ -45,11 +45,22 @@ npm i lit-colorpicker
   <input type='color' value='#000000'/>
 </label>
 <color-picker value="steelblue"></color-picker>
-
 ```
 
 ## Events
-Fires a 'colorpicked' (when click OK) and 'colorupdated' (any mutation) event with a color object in the event detail. Standard CustomEvent implementation. 
+
+| Event | When | `detail` |
+|-------|------|----------|
+| `color-change` | Any live mutation (drag, channel, hex input, `value` / `color` set) | `{ color, space, source }` |
+| `color-pick` | User clicks **OK** | `{ color, space, source }` |
+
+`color` is a [`modern-color`](https://www.npmjs.com/package/modern-color) instance. `space` is `'hsl'` or `'hsv'`. `source` is one of `'canvas' | 'hue' | 'channel' | 'input' | 'external'`.
+
+The `value` attribute is reflected (hex, or CSS color when alpha &lt; 1).
+
+```js
+import { ColorPicker, COLOR_CHANGE, COLOR_PICK } from 'lit-colorpicker';
+```
 
 ## Theming
 Set the following css variables to set a custom theme:

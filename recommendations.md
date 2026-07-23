@@ -8,26 +8,36 @@ Scratchpad for the lit-movable v1 upgrade session. Delete when done.
 - [x] Migrate HueBar: `horizontal` → `axis="x"` + `boundsX`; `<lit-movable>` → `<movable-el>`
 - [x] Migrate HSLCanvas to `<movable-el>` + `@move`
 - [x] Fix HueBar `this.h` → `this.hue`; HSLCanvas height typo `'p'` → `'px'`
-- [ ] Fix HSLCanvas circle drag regression
-- [ ] Validate canvas bounds (center-on-canvas; circle may overhang)
+- [x] Fix HSLCanvas circle drag regression
+- [x] Validate canvas bounds (center-on-canvas; circle may overhang)
+- [x] HP1: public `color-change` / `color-pick` + reflected `value`
+- [x] HP2: ColorModel — stop mutating Color with hsx/fromHSLCanvas
 
 ---
 
 ## High priority
 
-### 1. Single color event name + public contract
+### 1. Single color event name + public contract — DONE
 
-Internally: `color-update` / `colorchanged` / `colorpicked`. README mentions `colorupdated`. Pick one public API (e.g. `color-change` + `color-pick`), document it, and reflect `value` as an attribute for declarative hosts.
+Public API:
+- `color-change` — live mutations (`detail: { color, space, source }`)
+- `color-pick` — OK button
+- `value` attribute reflected (hex, or css when alpha &lt; 1)
 
-### 2. Stop mutating Color with ad-hoc flags
+Internal only: `color-intent` (children → parent), `hue-update`, `sliding-hue`.
 
-`c.hsx`, `c.fromHSLCanvas` on Color instances fight Lit’s update cycle. Prefer a small controller/state object:
+### 2. Stop mutating Color with ad-hoc flags — DONE
+
+`src/color-state.js` defines `ColorModel`:
 
 ```js
-{ color, space: 'hsl'|'hsv', source: 'canvas'|'hue'|'channel'|'input' }
+{ color, space: 'hsl'|'hsv', source: 'canvas'|'hue'|'channel'|'input'|'external', hsx }
 ```
 
-Children emit intent; parent owns the model and pushes props down.
+- `color` stays a pure `modern-color` instance (no `.hsx` / `.fromHSLCanvas`)
+- `hsx` holds explicit polar coords when the last edit was in HS* space (avoids RGB round-trip drift)
+- `source` lets canvas skip redundant gradient paints when it was the writer
+- Parent `applyModel()` is the single write path; children only `emitColorIntent()`
 
 ### 3. Package surface for consumers
 
@@ -88,7 +98,7 @@ Peer if hosts share color math; keep bundled for zero-config drop-in.
 
 ---
 
-## Regression notes (circle drag)
+## Regression notes (circle drag) — RESOLVED
 
 Observed markup:
 
@@ -98,11 +108,17 @@ Observed markup:
 </movable-el>
 ```
 
-Symptoms: circle ignores click/drag after movable v1 migration.
+### Root causes
 
-Suspects to verify:
+1. **Relative bounds + attribute order**  
+   lit-movable v1 parses `boundsX`/`boundsY` as offsets from *current* `style.left`/`top`. Binding `boundsX="0, 160"` with `posLeft=85` becomes absolute `[85, 245]` (can’t drag left/up). Worse: setting `bounds*` *before* `pos*` in the template (or via attributes that skip re-set) leaves stale/corrupt clamps. Hue bar was measured at bounds `[268, 668]` while thumb sat at `6.67` — fully stuck.
 
-1. **Relative bounds** making min ≈ current position (only down-right drag possible)
-2. **Hit target**: `.circle { position: absolute }` takes it out of flow → host may be 0×0; clicks fall through to canvas (`@click` only, no drag)
-3. **Controlled `posTop`/`posLeft`** re-bound every render fighting in-progress drag
-4. **Event wiring**: `.onmove` (state object) → `@move` (`event.detail`)
+2. **0×0 hit target**  
+   `.circle { position: absolute }` took the knob out of flow, so `<movable-el>` collapsed to 0×0. Clicks often fell through to the canvas (`@click` only — no drag).
+
+### Fix applied
+
+- Relative bounds: `` `${-left}, ${size - left}` `` so the center stays on-canvas (knob may overhang).
+- Template/property order: set `posTop`/`posLeft` **before** `boundsX`/`boundsY`.
+- In-flow knob + margin centering so the host has a real drag target; `z-index: 1` above the canvas.
+- Same pos-before-bounds + in-flow treatment on the hue slider.

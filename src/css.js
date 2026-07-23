@@ -115,7 +115,8 @@ export const root = css`
     background-color: var(--input-bg);
     transition: opacity .3s;
   }
-  :host dialog.open{
+  /* Use the native [open] attribute from dialog.show() — more reliable than a parallel class. */
+  :host dialog[open]{
     opacity: 1;
   }
   :host dialog *{

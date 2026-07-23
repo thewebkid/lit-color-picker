@@ -1,18 +1,23 @@
 import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
 import { Color } from 'modern-color';
-import { colorEvent } from './lib.js';
+import { emitColorIntent } from './color-state.js';
 
 export class HSLCanvas extends LitElement {
   static properties = {
     color: { type: Object },
+    /** Explicit polar coords from the parent model (not mutated onto Color). */
+    hsx: { type: Object, attribute: false },
+    /** Provenance of the last model write — skip gradient rebuild when we were the source. */
+    source: { type: String, attribute: false },
     isHsl: { type: Boolean },
-    size: { type: Number},
-    debounceMode: {type: Boolean},
+    size: { type: Number },
+    debounceMode: { type: Boolean },
     ctx: { type: Object, state: true, attribute: false },
     hsw: { type: Object, state: true, attribute: false },
-    circlePos: { type: Object, state: true, attribute: false }
+    circlePos: { type: Object, state: true, attribute: false },
   };
+
   static styles = css`
     :host .outer {
       position: absolute;
@@ -47,13 +52,10 @@ export class HSLCanvas extends LitElement {
   constructor() {
     super();
     this.isHsl = true;
-    this.circlePos = { top: 0, left: 0, bounds: {x: '', y: ''} };
+    this.hsx = null;
+    this.source = 'external';
+    this.circlePos = { top: 0, left: 0, bounds: { x: '', y: '' } };
     this.size = 160;
-  }
-
-  setColor(c) {
-    //this.color = c;
-    colorEvent(this.renderRoot, c);
   }
 
   setCircleCss(x, y) {
@@ -80,18 +82,22 @@ export class HSLCanvas extends LitElement {
     let w = (size - y) / size;
     w = Math.round(w * 100);
     let sat = Math.round((x / size) * 100);
-    let hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']: w };
+    const hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']: w };
 
-    let c = isHsl ? Color.fromHsl(hsx)
-      : Color.fromHsv(hsx);
+    const c = isHsl ? Color.fromHsl(hsx) : Color.fromHsv(hsx);
     this.setCircleCss(x, y);
     c.a = color.alpha;
-    c.hsx = hsx;
-    c.fromHSLCanvas = true;
-    this.setColor(c);
+
+    // Intent only — parent owns the model. hsx travels beside Color, not on it.
+    emitColorIntent(this.renderRoot, {
+      color: c,
+      source: 'canvas',
+      hsx,
+      space: isHsl ? 'hsl' : 'hsv',
+    });
   }
 
-  debouncePaintDetail(hsx){
+  debouncePaintDetail(hsx) {
     clearTimeout(this.bouncer);
     this.bouncer = setTimeout(() => this.paintHSL(hsx, true), 50);
     this.paintHSL(hsx, false);
@@ -100,67 +106,70 @@ export class HSLCanvas extends LitElement {
   // todo: test assumption that this perf lag (lit warning)
   //  is ok due to rendering canvas post update
   paintHSL(hsx, detail = null) {
-    if (this.debounceMode && detail === null){
-      // enable rapid painting in lower res
+    if (this.debounceMode && detail === null) {
       return this.debouncePaintDetail(hsx);
     }
     const { ctx, color, isHsl, size } = this;
     if (!ctx) {
       return;
     }
-    //console.time('paint'+detail)
 
-    let clr = color;
-    hsx = hsx ?? isHsl ? clr.hsl : clr.hsv; // hue-sat-whatever
-    hsx.w = isHsl ? hsx.l : hsx.v;
-    let { h, s, w } = hsx;
-    let hsw = this.hsw = { h, s, w };
+    let coords = hsx ?? (isHsl ? color.hsl : color.hsv);
+    coords = { ...coords };
+    coords.w = isHsl ? coords.l : coords.v;
+    let { h, s, w } = coords;
+    let hsw = (this.hsw = { h, s, w });
     let scale = size / 100;
     const fillHsl = (h, s, l) => `hsl(${h}, ${s}%, ${100 - l}%)`;
     const fillHsv = (h, s, v) => Color.fromHsv({ h, s, v: 100 - v }).hex;
     const fill = isHsl ? fillHsl : fillHsv;
 
-    let incr = detail === false ? 4 : 1;//rapid painting during hue slider ops
+    let incr = detail === false ? 4 : 1; // rapid painting during hue slider ops
     for (let s = 0; s < 100; s += incr) {
       for (let w = 0; w < 100; w += incr) {
         ctx.fillStyle = fill(h, s, w);
-        ctx.fillRect(s, w, (s + incr), (w + incr));
+        ctx.fillRect(s, w, s + incr, w + incr);
       }
     }
 
-    this.setCircleCss(hsw.s * scale, size - (hsx.w * scale));
-    //console.timeEnd('paint'+detail)
+    this.setCircleCss(hsw.s * scale, size - coords.w * scale);
   }
 
   willUpdate(props) {
-    if (props.has('color') || props.has('isHsl')) {
-      if (this.color?.hsx){
-        if (this.color.fromHSLCanvas){
-          delete this.color.fromHSLCanvas;//avoid extra paint job
-          return;
-        }
-        return this.paintHSL(this.color.hsx);
-      }
-      this.paintHSL();
+    if (!(props.has('color') || props.has('isHsl') || props.has('hsx') || props.has('source'))) {
+      return;
     }
-  }
 
-  firstUpdated(props) {
-    let canvas = this.renderRoot.querySelector('canvas');
-    this.ctx = canvas.getContext('2d');
+    // We just emitted this change — knob already moved; hue is unchanged so
+    // the gradient does not need a rebuild.
+    if (this.source === 'canvas' && !props.has('isHsl')) {
+      return;
+    }
+
+    // Prefer parent-provided hsx (preserves polar precision) when present.
+    if (this.hsx) {
+      this.paintHSL(this.hsx);
+      return;
+    }
     this.paintHSL();
   }
 
-  circleMove({posTop: offsetY, posLeft: offsetX}){
-    this.pickCoord({offsetX, offsetY});
+  firstUpdated() {
+    const canvas = this.renderRoot.querySelector('canvas');
+    this.ctx = canvas.getContext('2d');
+    this.paintHSL(this.hsx);
+  }
+
+  circleMove({ posTop: offsetY, posLeft: offsetX }) {
+    this.pickCoord({ offsetX, offsetY });
   }
 
   render() {
-    let hw = { height: this.size + 'px', width: this.size + 'px' };
-    let {top, left, bounds} = this.circlePos;
+    const hw = { height: this.size + 'px', width: this.size + 'px' };
+    const { top, left, bounds } = this.circlePos;
     // pos* BEFORE bounds*: lit-movable parses bounds relative to current style.left/top.
     return html`
-      <div class='outer' @click='${this.pickCoord}' style='${styleMap(hw)}'>
+      <div class='outer' @click=${this.pickCoord} style=${styleMap(hw)}>
         <canvas height='100' width='100'></canvas>
         <movable-el
           .posTop=${top}
@@ -170,7 +179,8 @@ export class HSLCanvas extends LitElement {
           @move=${(e) => this.circleMove(e.detail)}>
           <div class='circle'></div>
         </movable-el>
-      </div>`;
+      </div>
+    `;
   }
 }
 

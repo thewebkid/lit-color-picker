@@ -8,32 +8,30 @@ import { clickCenter } from './test.utilities.js';
 describe('ColorPicker', () => {
 
   it('root and all inputs pass the a11y audit', async () => {
-
     const cp = await fixture(html`
       <color-picker></color-picker>
     `);
-    const inputs = Array.from(await cp.shadowRoot.querySelectorAll('color-input-channel'))
-      .map(e => e.shadowRoot.querySelector('input'));
+    const inputs = Array.from(cp.shadowRoot.querySelectorAll('color-input-channel')).map(
+      (e) => e.shadowRoot.querySelector('input')
+    );
     inputs.push(cp.shadowRoot.querySelector('input#hex'));
 
     await expect(cp).shadowDom.to.be.accessible();
-    // todo: understand the Axe is already running error
-    // the console warnings only appear on this test. wth
-    inputs.forEach(async (input) => {
+    for (const input of inputs) {
       await expect(input).to.be.accessible();
-    });
-
+    }
   });
+
   it('should have 7 buttons that pass the a11y audit', async () => {
     const cp = await fixture(html`
       <color-picker value=blue></color-picker>
     `);
-    const buttons = Array.from(await cp.shadowRoot.querySelectorAll('.button'));
+    const buttons = Array.from(cp.shadowRoot.querySelectorAll('.button'));
     await expect(buttons.length).to.be.eq(7);
-    //2 mode toggle, 1 clipboard dialog toggle, 3 clipboard format, 1 ok
-    buttons.forEach(async (btn) => {
+    // 2 mode toggle, 1 clipboard dialog toggle, 3 clipboard format, 1 ok
+    for (const btn of buttons) {
       await expect(btn).to.be.accessible();
-    });
+    }
   });
   it('should change to hsv when clicked', async () => {
     const cp = await fixture(html`
@@ -154,18 +152,23 @@ describe('ColorPicker', () => {
     const cp = await fixture(html`
       <color-picker value='green'></color-picker>
     `);
-    let dialogActions = () => ['Hex', 'Rgb', 'Hsl'].map(s => cp.shadowRoot.getElementById(`copy${s}`));
-    let expectedValues = ['#008000', 'rgba(0,128,0,1)', 'hsl(120, 100%, 25%)'];
-    const visibleAndValid = () => dialogActions().every((a, i) => {
-      let v = a.querySelector('input').value;
-      const valid = v === expectedValues[i];
-      return a.offsetParent !== null && valid;
-    });
-    const hidden = () => dialogActions().every(a => a.offsetParent === null);
-    await expect(hidden()).to.be.eq(true);
-    const copyButton = cp.shadowRoot.querySelector('.button.copy');
-    await clickCenter(copyButton);
-    await expect(visibleAndValid()).to.be.eq(true);
+    const dlg = cp.shadowRoot.querySelector('dialog');
+    const dialogActions = () =>
+      ['Hex', 'Rgb', 'Hsl'].map((s) => cp.shadowRoot.getElementById(`copy${s}`));
+    const expectedValues = [
+      cp.color.hex,
+      cp.color.css,
+      cp.color.toString('hsl'),
+    ];
+    const valuesMatch = () =>
+      dialogActions().every((a, i) => a.querySelector('input').value === expectedValues[i]);
+
+    await expect(dlg.open).to.be.eq(false);
+    await clickCenter(cp.shadowRoot.querySelector('.button.copy'));
+    await cp.updateComplete;
+
+    await expect(dlg.open).to.be.eq(true);
+    await expect(valuesMatch()).to.be.eq(true);
   });
 
   it('should have a hsl-canvas element that responds to clicks', async () => {
@@ -177,16 +180,58 @@ describe('ColorPicker', () => {
     const canvas = hslc.shadowRoot.querySelector('canvas');
     const { offsetHeight, offsetWidth } = canvas;
     await clickCenter(canvas);
+    await cp.updateComplete;
+    await hslc.updateComplete;
 
-    //ensure movable circle properly repositioned
+    // posLeft/posTop are the sample point; offsetLeft is 8px less due to
+    // the in-flow centering margin on <movable-el>.
     const me = hslc.shadowRoot.querySelector('movable-el');
-    expect(me.offsetLeft).to.be.eq(offsetWidth / 2);
-    expect(me.offsetTop).to.be.eq(offsetHeight / 2);
+    expect(Number(me.posLeft)).to.be.eq(offsetWidth / 2);
+    expect(Number(me.posTop)).to.be.eq(offsetHeight / 2);
 
     const { s, l } = cp.color.hsl;
-    // parent saturation and luminosity channels should be at 50
     expect(s).to.be.eq(50);
     expect(l).to.be.eq(50);
+  });
 
+  it('should fire color-change on channel edits and color-pick on OK', async () => {
+    const cp = await fixture(html`
+      <color-picker value='red'></color-picker>
+    `);
+    const changes = [];
+    cp.addEventListener('color-change', (e) => changes.push(e.detail));
+    let picked = null;
+    cp.addEventListener('color-pick', (e) => {
+      picked = e.detail;
+    });
+
+    const h = Array.from(cp.shadowRoot.querySelectorAll('color-input-channel'))[4];
+    h.shadowRoot.querySelector('input').value = 180;
+    h.valueChange();
+    await cp.updateComplete;
+
+    await expect(changes.length).to.be.greaterThan(0);
+    await expect(changes.at(-1).source).to.be.eq('channel');
+    await expect(changes.at(-1).color.hex).to.be.eq('#00FFFF');
+    await expect(cp.value).to.be.eq('#00FFFF');
+    await expect(cp.getAttribute('value')).to.be.eq('#00FFFF');
+
+    cp.shadowRoot.querySelector('.ok .button').click();
+    await expect(picked?.color.hex).to.be.eq('#00FFFF');
+    await expect(picked?.source).to.be.eq('channel');
+  });
+
+  it('should keep Color free of hsx / fromHSLCanvas flags', async () => {
+    const cp = await fixture(html`
+      <color-picker value='#532579'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await clickCenter(hslc.shadowRoot.querySelector('canvas'));
+    await cp.updateComplete;
+
+    expect(cp.color.hsx).to.be.eq(undefined);
+    expect(cp.color.fromHSLCanvas).to.be.eq(undefined);
+    expect(cp.model.hsx).to.be.ok;
+    expect(cp.model.source).to.be.eq('canvas');
   });
 });

@@ -3,15 +3,20 @@ import { Color } from 'modern-color';
 import { styleMap } from 'lit/directives/style-map.js';
 import { colorEvent, hueGradient } from './lib.js';
 
+/**
+ * Hue strip. Emits `hue-update` { h } — parent merges into ColorModel.
+ * Sliding fires `sliding-hue` so the canvas can debounce paints.
+ */
 export class HueBar extends LitElement {
   static properties = {
     hue: { type: Number },
-    color: {type: Object},
+    color: { type: Object },
     gradient: { type: String, attribute: false },
-    sliderStyle: { type: String, attribute: false},
-    sliderBounds: {type: Object},
-    width: { type: Number, attribute: false }
+    sliderStyle: { type: String, attribute: false },
+    sliderBounds: { type: Object },
+    width: { type: Number, attribute: false },
   };
+
   static styles = css`
     :host > div {
       display: block;
@@ -37,10 +42,11 @@ export class HueBar extends LitElement {
 
   constructor() {
     super();
-    this.gradient = { backgroundImage: `linear-gradient(90deg, ${hueGradient(24)})` };
+    this.gradient = {
+      backgroundImage: `linear-gradient(90deg, ${hueGradient(24)})`,
+    };
     this.width = 400;
     this.sliderStyle = { display: 'none' };
-
   }
 
   firstUpdated() {
@@ -59,36 +65,27 @@ export class HueBar extends LitElement {
     this.selectHue({ offsetX: posLeft });
   }
 
-  get sliderBounds(){
+  get sliderBounds() {
     let r = this.width / 360;
     let posLeft = Number(this.hue) * r;
     let min = 0 - posLeft;
     let max = this.width - posLeft;
-    return {min, max, posLeft};
+    return { min, max, posLeft };
   }
+
   get sliderCss() {
     return (h) => {
-      if (this.color.hsx){
-        h = this.color.hsx.h;
-      }
       if (h === undefined) {
-        h = this.color.hsl.h;
+        h = this.hue ?? this.color.hsl.h;
       }
-      let color = Color.parse({ h, s: 100, l: 50 });
-
-      return  { backgroundColor: color.css };
+      const color = Color.parse({ h, s: 100, l: 50 });
+      return { backgroundColor: color.css };
     };
   }
 
-
   willUpdate(props) {
-    let h = props.get('hue');
-    if (h && isFinite(this.hue)) {
-      if (this.color?.hsx){
-        return; // console.log({hueBarIgnored: this.color.hsx});
-      }
-      let hue = this.hue;
-      this.sliderStyle = this.sliderCss(hue);
+    if (props.has('hue') && isFinite(this.hue)) {
+      this.sliderStyle = this.sliderCss(this.hue);
     }
   }
 
@@ -97,22 +94,21 @@ export class HueBar extends LitElement {
     let l = e.offsetX;
     let h = Math.max(0, Math.min(359, Math.round(l * r)));
     let target = this.renderRoot.querySelector('a');
-    let event = new CustomEvent('hue-update', {
-      bubbles: true,
-      composed: true,
-      detail: { h }
-    });
-
-    target.dispatchEvent(event);
+    target.dispatchEvent(
+      new CustomEvent('hue-update', {
+        bubbles: true,
+        composed: true,
+        detail: { h },
+      })
+    );
     this.sliderStyle = this.sliderCss(h);
   }
 
   render() {
-
     const { min, max, posLeft } = this.sliderBounds;
     // posLeft BEFORE boundsX: lit-movable parses bounds relative to current style.left.
     return html`
-      <div style=${styleMap(this.gradient)} class='bar' @click='${this.selectHue}'>
+      <div style=${styleMap(this.gradient)} class='bar' @click=${this.selectHue}>
         <movable-el
           axis='x'
           .posLeft=${posLeft}
@@ -122,7 +118,8 @@ export class HueBar extends LitElement {
           @moveend=${this.onSliderEnd}>
           <a class='slider' style=${styleMap(this.sliderCss(this.hue))}></a>
         </movable-el>
-      </div>`;
+      </div>
+    `;
   }
 }
 
