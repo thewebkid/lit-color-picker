@@ -1,4 +1,4 @@
-# \<color-picker>  [![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# \<color-picker>  [![npm version](https://badge.fury.io/js/lit-colorpicker.svg)](https://badge.fury.io/js/lit-colorpicker) [![tests](https://img.shields.io/github/actions/workflow/status/thewebkid/lit-color-picker/test.yml?branch=master&label=tests)](https://github.com/thewebkid/lit-color-picker/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <img src="https://thewebkid.com/lit-colorpicker.png?v=2" width=600>
 
 A rich colorpicker web component. Enables deep visualization into all channels of a color.  
