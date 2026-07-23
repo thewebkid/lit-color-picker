@@ -12,6 +12,7 @@ Scratchpad for the lit-movable v1 upgrade session. Delete when done.
 - [x] Validate canvas bounds (center-on-canvas; circle may overhang)
 - [x] HP1: public `color-change` / `color-pick` + reflected `value`
 - [x] HP2: ColorModel — stop mutating Color with hsx/fromHSLCanvas
+- [x] HP3: peerDeps for lit/lit-movable + Vite externals; upgrade Vite to 8
 
 ---
 
@@ -39,9 +40,9 @@ Internal only: `color-intent` (children → parent), `hue-update`, `sliding-hue`
 - `source` lets canvas skip redundant gradient paints when it was the writer
 - Parent `applyModel()` is the single write path; children only `emitColorIntent()`
 
-### 3. Package surface for consumers
+### 3. Package surface for consumers — DONE
 
-Vite currently bundles `lit` + `lit-movable` into `dist` (~77kb). Mirror lit-movable: `lit` (and maybe `lit-movable`) as **peerDependencies**, mark them `external` in Vite, ship types if possible. Prevents duplicate Lit when hosts already use it.
+`lit` + `lit-movable` are **peerDependencies**; Vite marks them (and `modern-color`) `external`. `modern-color` stays a regular dependency. Types still TODO.
 
 ### 4. Canvas movable bounds (relative, not absolute)
 

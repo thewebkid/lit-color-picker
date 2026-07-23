@@ -10,8 +10,10 @@ Since this is a [Lit 3 web component](https://lit.dev/), this will work inside a
 ## Installation
 
 ```bash
-npm i lit-colorpicker
+npm i lit-colorpicker lit lit-movable
 ```
+
+`lit` and `lit-movable` are peer dependencies (same Lit instance as your app).
 
 ## Usage
 
