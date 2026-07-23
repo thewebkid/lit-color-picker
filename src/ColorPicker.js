@@ -15,6 +15,7 @@ import {
   colorToValue,
   createColorModel,
   emitPublicColorEvent,
+  isValidColor,
 } from './color-state.js';
 /**
  * <color-picker>
@@ -61,13 +62,17 @@ export class ColorPicker extends LitElement {
   set color(input) {
     if (input == null) return;
     const color = Color.parse(input);
-    if (!color) return;
+    if (!color || !isValidColor(color)) return;
     this.applyModel(
-      createColorModel(color, {
-        space: this.isHsl ? 'hsl' : 'hsv',
-        source: 'external',
-        hsx: null,
-      })
+      createColorModel(
+        color,
+        {
+          space: this.isHsl ? 'hsl' : 'hsv',
+          source: 'external',
+          hsx: null,
+        },
+        this.model
+      )
     );
   }
 
@@ -77,6 +82,19 @@ export class ColorPicker extends LitElement {
    * @param {{ emit?: boolean }} [opts]
    */
   applyModel(model, { emit = true } = {}) {
+    // Refuse NaN RGB (e.g. fromHsl with non-finite L) — writing those into
+    // `value` re-parses as garbage like `#0ANANNAN` and wipes the UI.
+    if (!isValidColor(model.color)) {
+      return;
+    }
+
+    // Re-run through createColorModel so sticky hue / hsx scrub always apply.
+    model = createColorModel(
+      model.color,
+      { space: model.space, source: model.source, hsx: model.hsx },
+      this.model
+    );
+
     this.model = model;
     this.hex = model.color.hex;
 
@@ -96,13 +114,21 @@ export class ColorPicker extends LitElement {
     // Host attribute / property `value` changed from the outside.
     if (changed.has('value') && !this._syncingValue) {
       const color = Color.parse(this.value);
-      if (color && colorToValue(color) !== colorToValue(this.model.color)) {
+      if (
+        color &&
+        isValidColor(color) &&
+        colorToValue(color) !== colorToValue(this.model.color)
+      ) {
         this.applyModel(
-          createColorModel(color, {
-            space: this.isHsl ? 'hsl' : 'hsv',
-            source: 'external',
-            hsx: null,
-          }),
+          createColorModel(
+            color,
+            {
+              space: this.isHsl ? 'hsl' : 'hsv',
+              source: 'external',
+              hsx: null,
+            },
+            this.model
+          ),
           { emit: true }
         );
       }
@@ -111,12 +137,15 @@ export class ColorPicker extends LitElement {
     if (changed.has('isHsl')) {
       const space = this.isHsl ? 'hsl' : 'hsv';
       if (this.model.space !== space) {
-        // Drop polar lock and mark external so canvas/channels fully refresh.
-        this.model = createColorModel(this.model.color, {
-          space,
-          source: 'external',
-          hsx: null,
-        });
+        // Keep sticky hue; mark external so canvas/channels fully refresh.
+        this.applyModel(
+          createColorModel(
+            this.model.color,
+            { space, source: 'external', hsx: null },
+            this.model
+          ),
+          { emit: false }
+        );
       }
     }
   }
@@ -124,12 +153,17 @@ export class ColorPicker extends LitElement {
   /** Child `color-intent` → update model. */
   onColorIntent({ detail }) {
     const { color, source, hsx = null, space } = detail;
+    if (!isValidColor(color)) return;
     this.applyModel(
-      createColorModel(color, {
-        source,
-        hsx,
-        space: space ?? (this.isHsl ? 'hsl' : 'hsv'),
-      })
+      createColorModel(
+        color,
+        {
+          source,
+          hsx,
+          space: space ?? (this.isHsl ? 'hsl' : 'hsv'),
+        },
+        this.model
+      )
     );
   }
 
@@ -137,16 +171,20 @@ export class ColorPicker extends LitElement {
   setColorFromInput() {
     const cs = this.renderRoot.querySelector('input#hex').value;
     const color = Color.parse(cs);
-    if (!color) {
+    if (!color || !isValidColor(color)) {
       console.log(`ignored unparsable input: ${cs}`);
       return;
     }
     this.applyModel(
-      createColorModel(color, {
-        source: 'input',
-        space: this.isHsl ? 'hsl' : 'hsv',
-        hsx: null,
-      })
+      createColorModel(
+        color,
+        {
+          source: 'input',
+          space: this.isHsl ? 'hsl' : 'hsv',
+          hsx: null,
+        },
+        this.model
+      )
     );
   }
 
@@ -158,7 +196,9 @@ export class ColorPicker extends LitElement {
     const hsx = { ...base, h };
     let color = this.isHsl ? Color.fromHsl(hsx) : Color.fromHsv(hsx);
     color.a = this.color.alpha;
-    this.applyModel(createColorModel(color, { source: 'hue', space, hsx }));
+    this.applyModel(
+      createColorModel(color, { source: 'hue', space, hsx }, this.model)
+    );
   }
 
   setHsl(hsl) {

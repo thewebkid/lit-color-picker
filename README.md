@@ -17,6 +17,8 @@ npm i lit-colorpicker lit lit-movable
 
 ## Usage
 
+Side-effect import registers `<color-picker>` (and pulls in peer `lit` / `lit-movable`):
+
 ```html
 <script type="module">
   import 'lit-colorpicker';
@@ -49,6 +51,16 @@ npm i lit-colorpicker lit lit-movable
 <color-picker value="steelblue"></color-picker>
 ```
 
+Named imports (same package entry — `lit-colorpicker` → `index.js`):
+
+```js
+import {
+  ColorPicker,
+  COLOR_CHANGE,
+  COLOR_PICK,
+} from 'lit-colorpicker';
+```
+
 ## Events
 
 | Event | When | `detail` |
@@ -59,10 +71,6 @@ npm i lit-colorpicker lit lit-movable
 `color` is a [`modern-color`](https://www.npmjs.com/package/modern-color) instance. `space` is `'hsl'` or `'hsv'`. `source` is one of `'canvas' | 'hue' | 'channel' | 'input' | 'external'`.
 
 The `value` attribute is reflected (hex, or CSS color when alpha &lt; 1).
-
-```js
-import { ColorPicker, COLOR_CHANGE, COLOR_PICK } from 'lit-colorpicker';
-```
 
 ## Theming
 Set the following css variables to set a custom theme:
@@ -87,18 +95,19 @@ color-picker {
 Run the demo to use the dynamic theme picker.
 
 ## Run local
-Recommended so you can use the theme chooser. Uses vite. Will run on node 16+ - but will complain about compatibility if you are stuck on node 16 like me. Ignore these. It's fine.
+
+Uses Vite. Requires **Node 20.19+** or **22.12+** (Vite 8).
+
 ```bash
 git clone https://github.com/thewebkid/lit-color-picker.git
-cd cd ./lit-color-picker
+cd lit-color-picker
 npm i
-npm dev
+npm run dev
 ```
 
-## Run Tests 
+## Run Tests
+
 ```bash
 npm test
 ```
-
-
 

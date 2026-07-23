@@ -234,4 +234,130 @@ describe('ColorPicker', () => {
     expect(cp.model.hsx).to.be.ok;
     expect(cp.model.source).to.be.eq('canvas');
   });
+
+  it('should keep the preview color after releasing a circle drag', async () => {
+    const cp = await fixture(html`
+      <color-picker value='rgb(250, 128, 113)'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await hslc.updateComplete;
+    await cp.updateComplete;
+
+    const canvas = hslc.shadowRoot.querySelector('canvas');
+    const me = hslc.shadowRoot.querySelector('movable-el');
+    const cRect = canvas.getBoundingClientRect();
+    const start = me.getBoundingClientRect();
+
+    // Drag the knob toward the right edge, slightly down (high sat, lower L).
+    const startX = Math.round(start.left + start.width / 2);
+    const startY = Math.round(start.top + start.height / 2);
+    const endX = Math.round(cRect.left + cRect.width - 4);
+    const endY = Math.round(cRect.top + 40);
+
+    await sendMouse({ type: 'move', position: [startX, startY] });
+    await sendMouse({ type: 'down', position: [startX, startY] });
+    await sendMouse({ type: 'move', position: [endX, endY] });
+    await cp.updateComplete;
+
+    const duringDrag = {
+      r: cp.color.r,
+      g: cp.color.g,
+      b: cp.color.b,
+      hex: cp.color.hex,
+    };
+
+    // pointerup synthesizes a click on the knob; pre-fix that click used
+    // offsetX/Y relative to the 16px circle and snapped to near-white.
+    await sendMouse({ type: 'up', position: [endX, endY] });
+    await cp.updateComplete;
+    await hslc.updateComplete;
+
+    expect(cp.color.hex).to.be.eq(duringDrag.hex);
+    expect(cp.color.r).to.be.eq(duringDrag.r);
+    expect(cp.color.g).to.be.eq(duringDrag.g);
+    expect(cp.color.b).to.be.eq(duringDrag.b);
+    // Sanity: drag should have left a saturated (not near-white) color.
+    expect(cp.color.r - cp.color.g).to.be.greaterThan(50);
+  });
+
+  it('should preserve hue when dragging to grayscale (s=0)', async () => {
+    const cp = await fixture(html`
+      <color-picker value='#232E86'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await hslc.updateComplete;
+    await cp.updateComplete;
+
+    expect(cp.color.hsl.h).to.be.eq(233);
+
+    const l = cp.color.hsl.l;
+    const y = hslc.size - (l / 100) * hslc.size;
+    hslc.pickCoord({ offsetX: 0, offsetY: y });
+    await cp.updateComplete;
+
+    expect(cp.value).to.not.include('NAN');
+    expect(Number.isFinite(cp.color.r)).to.be.true;
+    expect(Number.isFinite(cp.color.g)).to.be.true;
+    expect(Number.isFinite(cp.color.b)).to.be.true;
+    expect(cp.model.hsx.s).to.be.eq(0);
+    expect(cp.model.hsx.h).to.be.eq(233);
+
+    const hInput = [...cp.shadowRoot.querySelectorAll('color-input-channel')]
+      .find((el) => el.channel === 'h')
+      .shadowRoot.querySelector('input');
+    expect(hInput.value).to.be.eq('233');
+  });
+
+  it('should ignore non-finite canvas coordinates (no #0ANANN poison)', async () => {
+    const cp = await fixture(html`
+      <color-picker value='#232E86'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await hslc.updateComplete;
+    const before = cp.color.hex;
+
+    hslc.pickCoord({ offsetX: 0, offsetY: undefined });
+    await cp.updateComplete;
+
+    expect(cp.color.hex).to.be.eq(before);
+    expect(cp.value).to.be.eq(before);
+    expect(cp.value).to.not.include('NAN');
+    expect(Number.isFinite(cp.color.g)).to.be.true;
+  });
+
+  it('should keep the circle clamped on-canvas when dragged past the edge', async () => {
+    const cp = await fixture(html`
+      <color-picker value='#232E86'></color-picker>
+    `);
+    const hslc = cp.shadowRoot.querySelector('hsl-canvas');
+    await hslc.updateComplete;
+    await cp.updateComplete;
+
+    const canvas = hslc.shadowRoot.querySelector('canvas');
+    const me = hslc.shadowRoot.querySelector('movable-el');
+    const cRect = canvas.getBoundingClientRect();
+    const start = me.getBoundingClientRect();
+    const size = hslc.size;
+
+    const startX = Math.round(start.left + start.width / 2);
+    const startY = Math.round(start.top + start.height / 2);
+    // Way past the left / top of the canvas (would reach the H/S fields if unclamped).
+    const endX = Math.round(cRect.left - 120);
+    const endY = Math.round(cRect.top - 80);
+
+    await sendMouse({ type: 'move', position: [startX, startY] });
+    await sendMouse({ type: 'down', position: [startX, startY] });
+    await sendMouse({ type: 'move', position: [endX, endY] });
+    await sendMouse({ type: 'up', position: [endX, endY] });
+    await cp.updateComplete;
+    await hslc.updateComplete;
+
+    expect(Number(me.posLeft)).to.be.at.least(0);
+    expect(Number(me.posLeft)).to.be.at.most(size);
+    expect(Number(me.posTop)).to.be.at.least(0);
+    expect(Number(me.posTop)).to.be.at.most(size);
+    expect(cp.model.hsx.s).to.be.at.least(0);
+    expect(cp.model.hsx.l).to.be.at.least(0);
+    expect(cp.value).to.not.include('NAN');
+  });
 });

@@ -10,10 +10,11 @@
   ],
   "license": "MIT",
   "author": "Ron Gilchrist (thewebkid)",
-  "version": "0.2.20",
+  "version": "0.3.0",
   "type": "module",
   "main": "index.js",
   "module": "index.js",
+  "types": "./index.d.ts",
   "homepage": "http://thewebkid.com/modules/lit-colorpicker",
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   },
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./index.js",
       "default": "./index.js"
     }
@@ -28,6 +30,7 @@
   "files": [
     "dist",
     "index.js",
+    "index.d.ts",
     "custom-elements.json",
     "README.md"
   ],
@@ -42,7 +45,7 @@
   },
   "peerDependencies": {
     "lit": "^3.0.0",
-    "lit-movable": "^1.0.0"
+    "lit-movable": "^1.0.1"
   },
   "dependencies": {
     "modern-color": "^1.3.0"
@@ -57,7 +60,7 @@
     "eslint-plugin-lit-a11y": "^1.1.0-next.1",
     "husky": "^4.3.8",
     "lit": "^3.3.0",
-    "lit-movable": "^1.0.0",
+    "lit-movable": "^1.0.1",
     "vite": "^8.1.5"
   },
   "customElements": "custom-elements.json"

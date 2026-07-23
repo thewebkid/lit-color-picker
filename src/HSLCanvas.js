@@ -1,7 +1,7 @@
 import { styleMap } from 'lit/directives/style-map.js';
 import { LitElement, html, css } from 'lit';
 import { Color } from 'modern-color';
-import { emitColorIntent } from './color-state.js';
+import { emitColorIntent, finiteOr } from './color-state.js';
 
 export class HSLCanvas extends LitElement {
   static properties = {
@@ -56,33 +56,70 @@ export class HSLCanvas extends LitElement {
     this.source = 'external';
     this.circlePos = { top: 0, left: 0, bounds: { x: '', y: '' } };
     this.size = 160;
+    /** While true, do not rewrite movable bounds — mid-drag reparse corrupts the clamp. */
+    this._dragging = false;
   }
 
-  setCircleCss(x, y) {
-    // lit-movable bounds are relative to the current pos; keep the knob center on-canvas
-    // (the 16px knob may overhang — that's intentional).
+  /**
+   * @param {number} x sample x (knob center), clamped to the canvas by callers
+   * @param {number} y sample y
+   * @param {{ updateBounds?: boolean }} [opts]
+   */
+  setCircleCss(x, y, { updateBounds = !this._dragging } = {}) {
+    // lit-movable bounds are offsets from *current* style.left/top.
+    // Absolute clamp we want: [0, size]. Relative form at position P: `${-P}, ${size-P}`.
+    // Re-writing those strings mid-drag (when style.left already moved but Lit's
+    // pos binding lags) reparses with a mismatched offset and the min bound goes
+    // negative — knob escapes the canvas. Freeze bounds for the active drag.
     const left = Number(x);
     const top = Number(y);
     const size = this.size;
+    const prev = this.circlePos;
     this.circlePos = {
       top,
       left,
-      bounds: {
-        x: `${-left}, ${size - left}`,
-        y: `${-top}, ${size - top}`,
-      },
+      bounds: updateBounds
+        ? {
+            x: `${-left}, ${size - left}`,
+            y: `${-top}, ${size - top}`,
+          }
+        : prev.bounds,
     };
   }
 
-  pickCoord({ offsetX, offsetY }) {
-    let x = offsetX;
-    let y = offsetY;
-    const { size, hsw, isHsl, color } = this;
+  onCircleStart() {
+    this._dragging = true;
+    // One clean reparse at drag start so _bounds* stay [0, size] for the gesture.
+    const { left, top } = this.circlePos;
+    this.setCircleCss(left, top, { updateBounds: true });
+  }
 
-    let w = (size - y) / size;
-    w = Math.round(w * 100);
+  onCircleEnd() {
+    this._dragging = false;
+    const { left, top } = this.circlePos;
+    this.setCircleCss(left, top, { updateBounds: true });
+  }
+
+  pickCoord({ offsetX, offsetY } = {}) {
+    const { size, hsw, isHsl, color, hsx: modelHsx } = this;
+
+    // Non-finite coords → fromHsl(l:NaN) → `#NANNANNAN` → value re-parse `#0ANANNAN`.
+    if (!Number.isFinite(offsetX) || !Number.isFinite(offsetY)) {
+      return;
+    }
+
+    const x = Math.min(size, Math.max(0, offsetX));
+    const y = Math.min(size, Math.max(0, offsetY));
+
+    // Prefer live gradient hue, then sticky model hsx, then RGB-derived hue.
+    const h =
+      finiteOr(hsw?.h) ??
+      finiteOr(modelHsx?.h) ??
+      finiteOr(color?.hsl?.h, 0);
+
+    let w = Math.round(((size - y) / size) * 100);
     let sat = Math.round((x / size) * 100);
-    const hsx = { h: hsw.h, s: sat, [isHsl ? 'l' : 'v']: w };
+    const hsx = { h, s: sat, [isHsl ? 'l' : 'v']: w };
 
     const c = isHsl ? Color.fromHsl(hsx) : Color.fromHsv(hsx);
     this.setCircleCss(x, y);
@@ -168,15 +205,19 @@ export class HSLCanvas extends LitElement {
     const hw = { height: this.size + 'px', width: this.size + 'px' };
     const { top, left, bounds } = this.circlePos;
     // pos* BEFORE bounds*: lit-movable parses bounds relative to current style.left/top.
+    // Click only on <canvas> — a click on the knob (normal after pointerup) has
+    // offsetX/Y relative to the 16px circle and would snap to near-white.
     return html`
-      <div class='outer' @click=${this.pickCoord} style=${styleMap(hw)}>
-        <canvas height='100' width='100'></canvas>
+      <div class='outer' style=${styleMap(hw)}>
+        <canvas height='100' width='100' @click=${this.pickCoord}></canvas>
         <movable-el
           .posTop=${top}
           .posLeft=${left}
           .boundsX=${bounds.x}
           .boundsY=${bounds.y}
-          @move=${(e) => this.circleMove(e.detail)}>
+          @movestart=${this.onCircleStart}
+          @move=${(e) => this.circleMove(e.detail)}
+          @moveend=${this.onCircleEnd}>
           <div class='circle'></div>
         </movable-el>
       </div>

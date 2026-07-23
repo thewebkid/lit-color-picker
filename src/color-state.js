@@ -27,19 +27,75 @@ export const COLOR_INTENT = 'color-intent';
  * @property {Record<string, number> | null} hsx  explicit {h,s,l} or {h,s,v} when last edit was in HS*
  */
 
+/** @param {unknown} n @param {number | null} [fallback] */
+export const finiteOr = (n, fallback = null) =>
+  Number.isFinite(n) ? /** @type {number} */ (n) : fallback;
+
+/**
+ * modern-color can emit `#NANNANNAN` when HSL/HSV channels are non-finite;
+ * that then re-parses into garbage like `#0ANANNAN` (r=10, g/b NaN).
+ * @param {Color | null | undefined} color
+ */
+export const isValidColor = (color) =>
+  !!color &&
+  Number.isFinite(color.r) &&
+  Number.isFinite(color.g) &&
+  Number.isFinite(color.b) &&
+  Number.isFinite(color.alpha);
+
+/**
+ * Keep a usable hue when saturation hits 0 (RGB→HSL makes hue undefined/0)
+ * and scrub non-finite polar channels so the model never stores NaNs.
+ *
+ * @param {Record<string, number> | null | undefined} hsx
+ * @param {{ color: Color, space: ColorSpace, prevHsx?: Record<string, number> | null }} ctx
+ * @returns {Record<string, number> | null}
+ */
+export const normalizeHsx = (hsx, { color, space, prevHsx = null }) => {
+  const derived = space === 'hsl' ? color.hsl : color.hsv;
+  const prevH = finiteOr(prevHsx?.h);
+
+  if (hsx) {
+    const h = finiteOr(hsx.h, prevH ?? finiteOr(derived.h, 0));
+    const s = finiteOr(hsx.s, finiteOr(derived.s, 0));
+    if (space === 'hsl') {
+      return { h, s, l: finiteOr(hsx.l, finiteOr(derived.l, 0)) };
+    }
+    return { h, s, v: finiteOr(hsx.v, finiteOr(derived.v, 0)) };
+  }
+
+  // No explicit polar lock — for grayscale, keep the last hue so the strip
+  // / H channel don't jump to 0 when the user desaturates.
+  if (derived.s === 0 && prevH != null) {
+    return space === 'hsl'
+      ? { h: prevH, s: 0, l: derived.l }
+      : { h: prevH, s: 0, v: derived.v };
+  }
+
+  return null;
+};
+
 /**
  * @param {Color} color
  * @param {{ space?: ColorSpace, source?: ColorSource, hsx?: Record<string, number> | null }} [opts]
+ * @param {ColorModel | null} [prev] previous model — supplies sticky hue
  * @returns {ColorModel}
  */
 export const createColorModel = (
   color,
-  { space = 'hsl', source = 'external', hsx = null } = {}
+  { space = 'hsl', source = 'external', hsx = null } = {},
+  prev = null
 ) => ({
   color,
   space,
   source,
-  hsx,
+  hsx: isValidColor(color)
+    ? normalizeHsx(hsx, {
+        color,
+        space,
+        prevHsx: prev?.hsx ?? null,
+      })
+    : null,
 });
 
 /**

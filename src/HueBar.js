@@ -90,6 +90,11 @@ export class HueBar extends LitElement {
   }
 
   selectHue(e) {
+    // Ignore clicks that originated on the thumb — after a drag, pointerup
+    // synthesizes a click whose offsetX is relative to the 8px slider.
+    if (e.target?.closest?.('movable-el')) {
+      return;
+    }
     let r = 360 / this.width;
     let l = e.offsetX;
     let h = Math.max(0, Math.min(359, Math.round(l * r)));

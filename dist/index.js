@@ -111,6 +111,7 @@ var c = (e, t, n) => {
 		e.has("hue") && isFinite(this.hue) && (this.sliderStyle = this.sliderCss(this.hue));
 	}
 	selectHue(e) {
+		if (e.target?.closest?.("movable-el")) return;
 		let t = 360 / this.width, n = e.offsetX, r = Math.max(0, Math.min(359, Math.round(n * t)));
 		this.renderRoot.querySelector("a").dispatchEvent(new CustomEvent("hue-update", {
 			bubbles: !0,
@@ -472,18 +473,45 @@ var f = t`
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
   }
-`, _ = "color-change", v = "color-pick", y = "color-intent", b = (e, { space: t = "hsl", source: n = "external", hsx: r = null } = {}) => ({
+`, _ = "color-change", v = "color-pick", y = "color-intent", b = (e, t = null) => Number.isFinite(e) ? e : t, x = (e) => !!e && Number.isFinite(e.r) && Number.isFinite(e.g) && Number.isFinite(e.b) && Number.isFinite(e.alpha), S = (e, { color: t, space: n, prevHsx: r = null }) => {
+	let i = n === "hsl" ? t.hsl : t.hsv, a = b(r?.h);
+	if (e) {
+		let t = b(e.h, a ?? b(i.h, 0)), r = b(e.s, b(i.s, 0));
+		return n === "hsl" ? {
+			h: t,
+			s: r,
+			l: b(e.l, b(i.l, 0))
+		} : {
+			h: t,
+			s: r,
+			v: b(e.v, b(i.v, 0))
+		};
+	}
+	return i.s === 0 && a != null ? n === "hsl" ? {
+		h: a,
+		s: 0,
+		l: i.l
+	} : {
+		h: a,
+		s: 0,
+		v: i.v
+	} : null;
+}, C = (e, { space: t = "hsl", source: n = "external", hsx: r = null } = {}, i = null) => ({
 	color: e,
 	space: t,
 	source: n,
-	hsx: r
-}), x = (e) => e.alpha < 1 ? e.css : e.hex, S = (e, t) => {
+	hsx: x(e) ? S(r, {
+		color: e,
+		space: t,
+		prevHsx: i?.hsx ?? null
+	}) : null
+}), w = (e) => e.alpha < 1 ? e.css : e.hex, T = (e, t) => {
 	e.dispatchEvent(new CustomEvent(y, {
 		bubbles: !0,
 		composed: !0,
 		detail: t
 	}));
-}, C = (e, t, n) => {
+}, E = (e, t, n) => {
 	e.dispatchEvent(new CustomEvent(t, {
 		bubbles: !0,
 		composed: !0,
@@ -493,7 +521,7 @@ var f = t`
 			source: n.source
 		}
 	}));
-}, w = {
+}, D = {
 	r: "R (red) channel",
 	g: "G (green) channel",
 	b: "B (blue) channel",
@@ -502,7 +530,7 @@ var f = t`
 	v: "V (value / brightness) channel",
 	l: "L (luminosity) channel",
 	a: "A (alpha / opacity) channel"
-}, T = class extends e {
+}, O = class extends e {
 	static properties = {
 		group: { type: String },
 		channel: { type: String },
@@ -549,7 +577,7 @@ var f = t`
 			...this.c,
 			[this.channel]: t
 		}, r = i.parse(n), a = this.group === "rgb" ? null : n;
-		S(this.renderRoot, {
+		T(this.renderRoot, {
 			color: r,
 			source: "channel",
 			hsx: a,
@@ -591,7 +619,7 @@ var f = t`
 		return n`
       <div class=${o({ active: this.active })}>
         <label for=${`channel_${this.channel}`}>${this.channel.toUpperCase()}</label>
-        <input id=${`channel_${this.channel}`} aria-label=${w[this.channel]}
+        <input id=${`channel_${this.channel}`} aria-label=${D[this.channel]}
           class='form-control'
           .value=${this.channel === "a" && this.v < 1 ? Math.min(1, this.v).toFixed(2) : Math.round(this.v)}
           type='number' min='0' max=${t} .step=${this.channel === "a" ? .01 : 1}
@@ -608,10 +636,10 @@ var f = t`
     `;
 	}
 };
-customElements.define("color-input-channel", T);
+customElements.define("color-input-channel", O);
 //#endregion
 //#region src/HSLCanvas.js
-var E = class extends e {
+var k = class extends e {
 	static properties = {
 		color: { type: Object },
 		hsx: {
@@ -679,32 +707,42 @@ var E = class extends e {
 				x: "",
 				y: ""
 			}
-		}, this.size = 160;
+		}, this.size = 160, this._dragging = !1;
 	}
-	setCircleCss(e, t) {
-		let n = Number(e), r = Number(t), i = this.size;
+	setCircleCss(e, t, { updateBounds: n = !this._dragging } = {}) {
+		let r = Number(e), i = Number(t), a = this.size, o = this.circlePos;
 		this.circlePos = {
-			top: r,
-			left: n,
-			bounds: {
-				x: `${-n}, ${i - n}`,
-				y: `${-r}, ${i - r}`
-			}
+			top: i,
+			left: r,
+			bounds: n ? {
+				x: `${-r}, ${a - r}`,
+				y: `${-i}, ${a - i}`
+			} : o.bounds
 		};
 	}
-	pickCoord({ offsetX: e, offsetY: t }) {
-		let n = e, r = t, { size: a, hsw: o, isHsl: s, color: c } = this, l = (a - r) / a;
-		l = Math.round(l * 100);
-		let u = Math.round(n / a * 100), d = {
-			h: o.h,
-			s: u,
-			[s ? "l" : "v"]: l
-		}, f = s ? i.fromHsl(d) : i.fromHsv(d);
-		this.setCircleCss(n, r), f.a = c.alpha, S(this.renderRoot, {
-			color: f,
+	onCircleStart() {
+		this._dragging = !0;
+		let { left: e, top: t } = this.circlePos;
+		this.setCircleCss(e, t, { updateBounds: !0 });
+	}
+	onCircleEnd() {
+		this._dragging = !1;
+		let { left: e, top: t } = this.circlePos;
+		this.setCircleCss(e, t, { updateBounds: !0 });
+	}
+	pickCoord({ offsetX: e, offsetY: t } = {}) {
+		let { size: n, hsw: r, isHsl: a, color: o, hsx: s } = this;
+		if (!Number.isFinite(e) || !Number.isFinite(t)) return;
+		let c = Math.min(n, Math.max(0, e)), l = Math.min(n, Math.max(0, t)), u = b(r?.h) ?? b(s?.h) ?? b(o?.hsl?.h, 0), d = Math.round((n - l) / n * 100), f = {
+			h: u,
+			s: Math.round(c / n * 100),
+			[a ? "l" : "v"]: d
+		}, p = a ? i.fromHsl(f) : i.fromHsv(f);
+		this.setCircleCss(c, l), p.a = o.alpha, T(this.renderRoot, {
+			color: p,
 			source: "canvas",
-			hsx: d,
-			space: s ? "hsl" : "hsv"
+			hsx: f,
+			space: a ? "hsl" : "hsv"
 		});
 	}
 	debouncePaintDetail(e) {
@@ -753,24 +791,26 @@ var E = class extends e {
 			width: this.size + "px"
 		}, { top: t, left: r, bounds: i } = this.circlePos;
 		return n`
-      <div class='outer' @click=${this.pickCoord} style=${s(e)}>
-        <canvas height='100' width='100'></canvas>
+      <div class='outer' style=${s(e)}>
+        <canvas height='100' width='100' @click=${this.pickCoord}></canvas>
         <movable-el
           .posTop=${t}
           .posLeft=${r}
           .boundsX=${i.x}
           .boundsY=${i.y}
-          @move=${(e) => this.circleMove(e.detail)}>
+          @movestart=${this.onCircleStart}
+          @move=${(e) => this.circleMove(e.detail)}
+          @moveend=${this.onCircleEnd}>
           <div class='circle'></div>
         </movable-el>
       </div>
     `;
 	}
 };
-customElements.define("hsl-canvas", E);
+customElements.define("hsl-canvas", k);
 //#endregion
 //#region src/ColorPicker.js
-var D = class extends e {
+var A = class extends e {
 	static properties = {
 		model: {
 			type: Object,
@@ -803,10 +843,10 @@ var D = class extends e {
 	constructor() {
 		super();
 		let e = i.parse(a.slateblue);
-		this.model = b(e, {
+		this.model = C(e, {
 			space: "hsl",
 			source: "external"
-		}), this.hex = e.hex, this.value = x(e), this.isHsl = !0, this.debounceMode = !1;
+		}), this.hex = e.hex, this.value = w(e), this.isHsl = !0, this.debounceMode = !1;
 	}
 	get color() {
 		return this.model.color;
@@ -814,71 +854,76 @@ var D = class extends e {
 	set color(e) {
 		if (e == null) return;
 		let t = i.parse(e);
-		t && this.applyModel(b(t, {
+		!t || !x(t) || this.applyModel(C(t, {
 			space: this.isHsl ? "hsl" : "hsv",
 			source: "external",
 			hsx: null
-		}));
+		}, this.model));
 	}
 	applyModel(e, { emit: t = !0 } = {}) {
-		this.model = e, this.hex = e.color.hex;
-		let n = x(e.color);
-		this.value !== n && (this._syncingValue = !0, this.value = n, this._syncingValue = !1), t && C(this, _, e);
+		if (!x(e.color)) return;
+		e = C(e.color, {
+			space: e.space,
+			source: e.source,
+			hsx: e.hsx
+		}, this.model), this.model = e, this.hex = e.color.hex;
+		let n = w(e.color);
+		this.value !== n && (this._syncingValue = !0, this.value = n, this._syncingValue = !1), t && E(this, _, e);
 	}
 	willUpdate(e) {
 		if (e.has("value") && !this._syncingValue) {
 			let e = i.parse(this.value);
-			e && x(e) !== x(this.model.color) && this.applyModel(b(e, {
+			e && x(e) && w(e) !== w(this.model.color) && this.applyModel(C(e, {
 				space: this.isHsl ? "hsl" : "hsv",
 				source: "external",
 				hsx: null
-			}), { emit: !0 });
+			}, this.model), { emit: !0 });
 		}
 		if (e.has("isHsl")) {
 			let e = this.isHsl ? "hsl" : "hsv";
-			this.model.space !== e && (this.model = b(this.model.color, {
+			this.model.space !== e && this.applyModel(C(this.model.color, {
 				space: e,
 				source: "external",
 				hsx: null
-			}));
+			}, this.model), { emit: !1 });
 		}
 	}
 	onColorIntent({ detail: e }) {
 		let { color: t, source: n, hsx: r = null, space: i } = e;
-		this.applyModel(b(t, {
+		x(t) && this.applyModel(C(t, {
 			source: n,
 			hsx: r,
 			space: i ?? (this.isHsl ? "hsl" : "hsv")
-		}));
+		}, this.model));
 	}
 	setColorFromInput() {
 		let e = this.renderRoot.querySelector("input#hex").value, t = i.parse(e);
-		if (!t) {
+		if (!t || !x(t)) {
 			console.log(`ignored unparsable input: ${e}`);
 			return;
 		}
-		this.applyModel(b(t, {
+		this.applyModel(C(t, {
 			source: "input",
 			space: this.isHsl ? "hsl" : "hsv",
 			hsx: null
-		}));
+		}, this.model));
 	}
 	setHue({ detail: { h: e } }) {
 		let t = this.isHsl ? "hsl" : "hsv", n = {
 			...this.model.hsx ?? (this.isHsl ? this.color.hsl : this.color.hsv),
 			h: e
 		}, r = this.isHsl ? i.fromHsl(n) : i.fromHsv(n);
-		r.a = this.color.alpha, this.applyModel(b(r, {
+		r.a = this.color.alpha, this.applyModel(C(r, {
 			source: "hue",
 			space: t,
 			hsx: n
-		}));
+		}, this.model));
 	}
 	setHsl(e) {
 		this.isHsl = e;
 	}
 	okColor() {
-		C(this, v, this.model);
+		E(this, v, this.model);
 	}
 	showCopyDialog() {
 		if (this.copied = null, this.dlg = this.dlg ?? this.renderRoot.querySelector("dialog"), this.dlg.open) return this.dlg.close();
@@ -1013,6 +1058,6 @@ var D = class extends e {
     `;
 	}
 };
-window.customElements.get("color-picker") || window.customElements.define("color-picker", D);
+window.customElements.get("color-picker") || window.customElements.define("color-picker", A);
 //#endregion
-export { _ as COLOR_CHANGE, y as COLOR_INTENT, v as COLOR_PICK, D as ColorPicker, x as colorToValue, b as createColorModel };
+export { _ as COLOR_CHANGE, y as COLOR_INTENT, v as COLOR_PICK, A as ColorPicker, w as colorToValue, C as createColorModel };
